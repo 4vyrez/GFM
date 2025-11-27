@@ -64,9 +64,47 @@ const TicTacToe = () => {
 
         if (emptyIndices.length === 0) return;
 
-        // Simple bot: random move
-        const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-        newBoard[randomIndex] = 'O';
+        let moveIndex = -1;
+
+        // Helper to check if a move leads to a win for a specific player
+        const findWinningMove = (player) => {
+            for (let index of emptyIndices) {
+                const tempBoard = [...newBoard];
+                tempBoard[index] = player;
+                if (checkWinner(tempBoard) === player) {
+                    return index;
+                }
+            }
+            return -1;
+        };
+
+        // 1. Try to win
+        moveIndex = findWinningMove('O');
+
+        // 2. Block player from winning
+        if (moveIndex === -1) {
+            moveIndex = findWinningMove('X');
+        }
+
+        // 3. Take center if available
+        if (moveIndex === -1 && newBoard[4] === null) {
+            moveIndex = 4;
+        }
+
+        // 4. Take random corner
+        if (moveIndex === -1) {
+            const corners = [0, 2, 6, 8].filter(idx => newBoard[idx] === null);
+            if (corners.length > 0) {
+                moveIndex = corners[Math.floor(Math.random() * corners.length)];
+            }
+        }
+
+        // 5. Take random available spot
+        if (moveIndex === -1) {
+            moveIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+        }
+
+        newBoard[moveIndex] = 'O';
         setBoard(newBoard);
 
         const winner = checkWinner(newBoard);
