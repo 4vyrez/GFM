@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const TicTacToe = () => {
+const TicTacToe = ({ onWin }) => {
     const [board, setBoard] = useState(Array(9).fill(null));
     const [isPlayerTurn, setIsPlayerTurn] = useState(true);
     const [gameStatus, setGameStatus] = useState('playing'); // 'playing', 'won', 'lost', 'draw'
@@ -13,9 +13,10 @@ const TicTacToe = () => {
     useEffect(() => {
         // Bot makes move after player
         if (!isPlayerTurn && gameStatus === 'playing') {
-            setTimeout(() => {
+            const timer = setTimeout(() => {
                 makeBotMove();
-            }, 500);
+            }, 600); // Slightly longer delay for natural feel
+            return () => clearTimeout(timer);
         }
     }, [isPlayerTurn, gameStatus]);
 
@@ -45,6 +46,7 @@ const TicTacToe = () => {
         const winner = checkWinner(newBoard);
         if (winner) {
             setGameStatus('won');
+            if (onWin) onWin();
             return;
         }
 
@@ -129,51 +131,58 @@ const TicTacToe = () => {
 
     const getStatusMessage = () => {
         if (gameStatus === 'won') return '🎉 Du hast gewonnen!';
-        if (gameStatus === 'lost') return '😊 Der Bot war schneller!';
+        if (gameStatus === 'lost') return '😈 Ich hab gewonnen!';
         if (gameStatus === 'draw') return '🤝 Unentschieden!';
-        return isPlayerTurn ? 'Du bist dran (X)' : 'Bot denkt nach...';
+        return isPlayerTurn ? 'Du bist dran 💕' : 'Ich überlege... 🤔';
     };
 
     return (
         <div
-            className={`transform transition-all duration-700 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+            className={`flex flex-col items-center transform transition-all duration-700 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
                 }`}
         >
-            <div className="text-center mb-4">
-                <p className="text-xl font-medium text-gray-800">{getStatusMessage()}</p>
+            <div className="text-center mb-6">
+                <p className={`text-xl font-medium transition-colors duration-300 ${gameStatus === 'won' ? 'text-green-500 scale-110' :
+                        gameStatus === 'lost' ? 'text-red-400' : 'text-gray-700'
+                    }`}>
+                    {getStatusMessage()}
+                </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 max-w-xs mx-auto mb-4">
+            <div className="grid grid-cols-3 gap-3 w-full max-w-sm mx-auto mb-8 p-4 bg-white/50 rounded-2xl shadow-sm">
                 {board.map((cell, index) => (
                     <button
                         key={index}
                         onClick={() => handleClick(index)}
-                        className={`
-              aspect-square rounded-lg text-3xl font-bold
-              transition-all duration-200
-              ${cell === null
-                                ? 'bg-white/60 hover:bg-white/80 hover:scale-105'
-                                : 'bg-white/90'
-                            }
-              ${cell === 'X' ? 'text-pastel-pink' : 'text-pastel-lavender'}
-              ${!isPlayerTurn || gameStatus !== 'playing' ? 'cursor-not-allowed' : 'cursor-pointer'}
-            `}
                         disabled={!isPlayerTurn || gameStatus !== 'playing' || cell !== null}
+                        className={`
+                            aspect-square rounded-xl text-4xl sm:text-5xl font-bold
+                            flex items-center justify-center
+                            transition-all duration-200 shadow-sm
+                            ${cell === null
+                                ? 'bg-white hover:bg-gray-50 hover:shadow-md cursor-pointer'
+                                : 'bg-white/90 cursor-default'
+                            }
+                            ${cell === 'X' ? 'text-pastel-pink scale-100' : 'text-pastel-lavender scale-100'}
+                            ${(!isPlayerTurn || gameStatus !== 'playing') && cell === null ? 'opacity-80 cursor-not-allowed' : ''}
+                        `}
                     >
-                        {cell}
+                        {cell && (
+                            <span className="animate-pop-in">
+                                {cell}
+                            </span>
+                        )}
                     </button>
                 ))}
             </div>
 
             {gameStatus !== 'playing' && (
-                <div className="text-center">
-                    <button
-                        onClick={resetGame}
-                        className="btn-primary"
-                    >
-                        Nochmal spielen
-                    </button>
-                </div>
+                <button
+                    onClick={resetGame}
+                    className="px-8 py-3 bg-white text-gray-700 font-medium rounded-full shadow-md hover:shadow-lg hover:bg-gray-50 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
+                >
+                    Nochmal spielen 🔄
+                </button>
             )}
         </div>
     );

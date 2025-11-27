@@ -5,7 +5,8 @@ const STORAGE_KEY = 'gfm_app_data';
 const defaultData = {
     lastVisit: null,
     streak: 0,
-    streakFreezes: 1,
+    streakFreezes: 1, // Legacy field, keeping for compatibility
+    lastStreakUpdateDate: null, // New field to track daily challenge success
     dailyContent: {
         date: null,
         photoId: null,
@@ -20,7 +21,7 @@ const defaultData = {
 export const getData = () => {
     try {
         const data = localStorage.getItem(STORAGE_KEY);
-        return data ? JSON.parse(data) : defaultData;
+        return data ? { ...defaultData, ...JSON.parse(data) } : defaultData;
     } catch (error) {
         console.error('Error reading from localStorage:', error);
         return defaultData;
@@ -72,4 +73,30 @@ export const visitedYesterday = (lastVisit) => {
 export const visitedToday = (lastVisit) => {
     if (!lastVisit) return false;
     return lastVisit === getTodayDate();
+};
+
+/**
+ * Mark the challenge as completed for today and update streak
+ * Returns { success: boolean, newStreak: number, alreadyCompleted: boolean }
+ */
+export const completeChallengeForToday = () => {
+    const data = getData();
+    const today = getTodayDate();
+
+    // If already completed today, don't increase streak again
+    if (data.lastStreakUpdateDate === today) {
+        return { success: true, newStreak: data.streak, alreadyCompleted: true };
+    }
+
+    // Increase streak
+    const newStreak = data.streak + 1;
+
+    const updatedData = {
+        ...data,
+        streak: newStreak,
+        lastStreakUpdateDate: today,
+    };
+
+    saveData(updatedData);
+    return { success: true, newStreak: newStreak, alreadyCompleted: false };
 };

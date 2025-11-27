@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 
-const FunArea = ({ minigame }) => {
+const FunArea = ({ children }) => {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
         setTimeout(() => setIsVisible(true), 300);
     }, []);
-
-    if (!minigame) return null;
 
     return (
         <div
@@ -20,13 +18,13 @@ const FunArea = ({ minigame }) => {
                     🎮 Überraschung für heute!
                 </h2>
                 <p className="text-gray-600 text-sm">
-                    Wenn du magst, kannst du das hier spielen ✨
+                    Wenn du magst, kannst du das hier spielen. Musst du aber nicht 💕
                 </p>
             </div>
 
             {/* Game Component */}
-            <div className="mt-6">
-                {minigame}
+            <div className="mt-6 flex justify-center">
+                {children}
             </div>
         </div>
     );
