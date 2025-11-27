@@ -2,11 +2,17 @@ import { useState, useEffect } from 'react';
 
 const EmotionalArea = ({ photo, message }) => {
     const [isVisible, setIsVisible] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     useEffect(() => {
         // Fade in animation on mount
         setTimeout(() => setIsVisible(true), 100);
-    }, []);
+        // Reset expansion when message changes
+        setIsExpanded(false);
+    }, [message]);
+
+    const isLongText = message.text.length > 120;
+    const displayedText = isExpanded || !isLongText ? message.text : message.text.slice(0, 120) + '...';
 
     return (
         <div
@@ -14,7 +20,7 @@ const EmotionalArea = ({ photo, message }) => {
                 }`}
         >
             {/* Glassmorphism Card */}
-            <div className="bg-white/80 backdrop-blur-md shadow-xl rounded-3xl overflow-hidden border border-white/50">
+            <div className="bg-white/80 backdrop-blur-md shadow-xl rounded-3xl overflow-hidden border border-white/50 transition-all duration-500">
 
                 {/* Image Banner */}
                 <div className="relative h-64 sm:h-80 w-full overflow-hidden group">
@@ -37,9 +43,23 @@ const EmotionalArea = ({ photo, message }) => {
                         <span className="text-4xl">🌸</span>
                     </div>
 
-                    <p className="text-2xl md:text-3xl font-serif text-gray-800 leading-relaxed italic">
-                        "{message.text}"
-                    </p>
+                    <div className={`relative transition-all duration-500 ${isExpanded ? 'mb-4' : ''}`}>
+                        <p
+                            className="text-2xl md:text-3xl font-serif text-gray-800 leading-relaxed italic transition-all duration-300"
+                            onClick={() => isLongText && setIsExpanded(!isExpanded)}
+                        >
+                            "{displayedText}"
+                        </p>
+
+                        {isLongText && (
+                            <button
+                                onClick={() => setIsExpanded(!isExpanded)}
+                                className="mt-4 text-sm text-gray-500 hover:text-pastel-pink font-medium transition-colors focus:outline-none"
+                            >
+                                {isExpanded ? 'Weniger anzeigen' : 'Alles lesen ✨'}
+                            </button>
+                        )}
+                    </div>
 
                     <div className="mt-8 flex justify-center">
                         <div className="h-1 w-16 bg-pastel-pink rounded-full opacity-50"></div>
