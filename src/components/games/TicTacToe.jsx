@@ -4,6 +4,7 @@ const TicTacToe = ({ onWin }) => {
     const [board, setBoard] = useState(Array(9).fill(null));
     const [isPlayerTurn, setIsPlayerTurn] = useState(true);
     const [gameStatus, setGameStatus] = useState('playing'); // 'playing', 'won', 'lost', 'draw'
+    const [attempts, setAttempts] = useState(1);
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
@@ -46,7 +47,7 @@ const TicTacToe = ({ onWin }) => {
         const winner = checkWinner(newBoard);
         if (winner) {
             setGameStatus('won');
-            if (onWin) onWin();
+            if (onWin) onWin(attempts);
             return;
         }
 
@@ -127,6 +128,7 @@ const TicTacToe = ({ onWin }) => {
         setBoard(Array(9).fill(null));
         setIsPlayerTurn(true);
         setGameStatus('playing');
+        setAttempts(prev => prev + 1);
     };
 
     const getStatusMessage = () => {
@@ -142,8 +144,11 @@ const TicTacToe = ({ onWin }) => {
                 }`}
         >
             <div className="text-center mb-6">
+                <div className="inline-block bg-white/80 px-3 py-1 rounded-full text-xs font-bold text-gray-400 mb-2 shadow-sm">
+                    Versuch #{attempts}
+                </div>
                 <p className={`text-xl font-medium transition-colors duration-300 ${gameStatus === 'won' ? 'text-green-500 scale-110' :
-                        gameStatus === 'lost' ? 'text-red-400' : 'text-gray-700'
+                    gameStatus === 'lost' ? 'text-red-400' : 'text-gray-700'
                     }`}>
                     {getStatusMessage()}
                 </p>

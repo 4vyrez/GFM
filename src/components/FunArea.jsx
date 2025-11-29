@@ -9,7 +9,7 @@ const FunArea = ({ children }) => {
 
     return (
         <div
-            className={`card max-w-2xl mx-auto transform transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            className={`card max-w-md mx-auto transform transition-all duration-700 ease-apple ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
         >
             {/* Header */}

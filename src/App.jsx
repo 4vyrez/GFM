@@ -8,15 +8,51 @@ import {
   getData,
   saveData,
   getTodayDate,
-  visitedToday,
-  completeChallengeForToday,
+  checkStreakLoss,
   isContentRefreshDue,
+  completeChallengeForToday,
   adminResetApp,
   adminForceNextCycle,
   adminSetStreak,
   SPECIAL_MESSAGE,
   daysBetween
 } from './utils/storage';
+
+const Countdown = ({ targetDate }) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      if (!targetDate) return;
+      const now = new Date();
+      const target = new Date(targetDate + 'T00:00:00');
+      const diff = target - now;
+
+      if (diff <= 0) {
+        setTimeLeft('Jetzt verfügbar!');
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      if (days > 0) {
+        setTimeLeft(`${days} Tagen, ${hours} Std. und ${minutes} Min.`);
+      } else if (hours > 0) {
+        setTimeLeft(`${hours} Std. und ${minutes} Min.`);
+      } else {
+        setTimeLeft(`${minutes} Min.`);
+      }
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 60000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  return <span>{timeLeft}</span>;
+};
 
 function App() {
   const [appData, setAppData] = useState(null);
@@ -30,7 +66,19 @@ function App() {
   }, []);
 
   const initializeApp = () => {
-    const data = getData();
+    // 1. Load data
+    let data = getData();
+
+    // 2. Check for streak loss (missed cycles)
+    data = checkStreakLoss(data);
+
+    // Migration: Reset test streak (10) if no updates have happened
+    if (data.streak === 10 && !data.lastStreakUpdateDate) {
+      data.streak = 0;
+    }
+
+    saveData(data); // Save potential updates from streak loss check
+
     const today = getTodayDate();
 
     // Check if we need to refresh content (every 3 days or first visit)
@@ -82,7 +130,7 @@ function App() {
     }
   };
 
-  const handleChallengeWin = () => {
+  const handleChallengeWin = (attempts) => {
     const result = completeChallengeForToday();
     if (result.success && !result.alreadyCompleted) {
       // Trigger Success Effect
@@ -93,6 +141,7 @@ function App() {
       setAppData(prev => ({
         ...prev,
         streak: result.newStreak,
+        streakFreezes: result.freezeEarned ? prev.streakFreezes + 1 : prev.streakFreezes,
         lastStreakUpdateDate: getTodayDate(),
         nextAvailableDate: result.nextAvailableDate // Ensure this is updated if returned
       }));
@@ -100,13 +149,6 @@ function App() {
       // Reload app data to ensure nextAvailableDate is synced if not returned directly
       setTimeout(() => initializeApp(), 500);
     }
-  };
-
-  const getDaysUntilNext = () => {
-    if (!appData?.nextAvailableDate) return 0;
-    const today = getTodayDate();
-    if (today >= appData.nextAvailableDate) return 0;
-    return daysBetween(today, appData.nextAvailableDate);
   };
 
   if (!appData || !dailyPhoto || !dailyMessage) {
@@ -152,7 +194,7 @@ function App() {
   const isChallengeLocked = appData.lastStreakUpdateDate === getTodayDate() && appData.nextAvailableDate > getTodayDate();
 
   return (
-    <div className="h-screen overflow-hidden bg-pastel-gradient font-sans text-gray-800 relative">
+    <div className="fixed inset-0 overflow-hidden bg-pastel-gradient font-sans text-gray-800 flex flex-col">
 
       {/* Success Overlay */}
       {showSuccessEffect && (
@@ -164,22 +206,25 @@ function App() {
         </div>
       )}
 
-      <div className="h-full overflow-y-auto py-8 px-4">
-        <div className="max-w-2xl mx-auto space-y-8 pb-20">
+      {/* Scrollable Content Container */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden py-6 px-4 scroll-smooth pb-safe">
+        <div className="max-w-xl mx-auto space-y-6 pb-20">
 
           {/* Header */}
-          <header className={`text-center transition-all duration-500 ${currentView === 'challenge' ? 'mb-6' : 'mb-10'}`}>
+          <header className={`text-center transition-all duration-500 ${currentView === 'challenge' ? 'mb-4' : 'mb-8'}`}>
             <h1
               onClick={(e) => e.detail === 3 && setCurrentView('admin')}
-              className={`font-bold text-gray-800 transition-all duration-500 ${currentView === 'challenge' ? 'text-3xl' : 'text-4xl md:text-5xl'} mb-2 cursor-default select-none`}
+              className={`font-bold text-gray-800 transition-all duration-500 ${currentView === 'challenge' ? 'text-2xl' : 'text-4xl md:text-5xl'} mb-2 cursor-default select-none`}
             >
               Hallo Schatz ❤️
             </h1>
-            <p className="text-gray-600 font-light">Hier ist etwas für dich</p>
+            <p className={`text-gray-600 font-light transition-all duration-500 ${currentView === 'challenge' ? 'text-xs opacity-0 h-0' : 'text-sm opacity-100'}`}>
+              Hier ist etwas für dich
+            </p>
           </header>
 
           {/* Navigation Toggle */}
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-6">
             <div className="bg-white/50 p-1 rounded-full shadow-sm flex relative">
               <button
                 onClick={() => setCurrentView('today')}
@@ -205,32 +250,33 @@ function App() {
 
           {/* Main Content Area */}
           <div className="transition-all duration-500 ease-in-out">
+
+            {/* Persistent Streak Display (Full or Compact) */}
+            <StreakDisplay
+              streak={appData.streak}
+              hasFreeze={appData.streakFreezes > 0}
+              lastUpdate={appData.lastStreakUpdateDate}
+              nextAvailableDate={appData.nextAvailableDate}
+              isCompact={currentView === 'challenge'}
+            />
+
             {currentView === 'today' ? (
               <div className="space-y-8 animate-fade-in">
-                <StreakDisplay
-                  streak={appData.streak}
-                  hasFreeze={appData.streakFreezes > 0}
-                  lastUpdate={appData.lastStreakUpdateDate}
-                />
-
-                {/* Timer / Info if locked */}
-                {isChallengeLocked && (
-                  <div className="text-center text-sm text-gray-500 bg-white/40 py-2 rounded-full max-w-xs mx-auto mb-4">
-                    ⏰ Nächste Flamme in {getDaysUntilNext()} Tagen
-                  </div>
-                )}
-
                 <EmotionalArea photo={dailyPhoto} message={dailyMessage} />
               </div>
             ) : (
-              <div className="animate-fade-in">
+              <div className="animate-slide-up">
                 {isChallengeLocked ? (
-                  <div className="card max-w-md mx-auto text-center py-12">
-                    <div className="text-6xl mb-4">🔒</div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">Challenge geschafft!</h3>
-                    <p className="text-gray-600 mb-6">Du hast deine Flamme für heute schon gesichert.</p>
-                    <div className="inline-block bg-pastel-lavender px-4 py-2 rounded-full text-sm font-medium text-gray-700">
-                      Nächste Chance in {getDaysUntilNext()} Tagen
+                  <div className="card max-w-md mx-auto text-center py-12 bg-white/60 backdrop-blur-sm border border-white/50 shadow-lg rounded-3xl">
+                    <div className="text-6xl mb-6 opacity-50 grayscale filter">🎮</div>
+                    <h3 className="text-2xl font-bold text-gray-800 mb-3">Challenge geschafft!</h3>
+                    <p className="text-gray-600 mb-8 px-6">
+                      Du hast deine Flamme für heute schon gesichert. Ruh dich aus, Schatz! 💕
+                    </p>
+
+                    <div className="inline-flex items-center gap-2 bg-pastel-lavender/50 px-6 py-3 rounded-full text-gray-700 font-medium border border-pastel-lavender">
+                      <span>⏳</span>
+                      <span>Nächste Chance in <Countdown targetDate={appData.nextAvailableDate} /></span>
                     </div>
                   </div>
                 ) : (

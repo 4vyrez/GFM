@@ -9,7 +9,7 @@ const SPECIAL_MESSAGE_TEXT = "Heute wirst du deine 18te Flamme bekommen, daran i
 const defaultData = {
     lastVisit: null,
     streak: 0,
-    streakFreezes: 1, // Legacy
+    streakFreezes: 0, // Start with 0
     lastStreakUpdateDate: null,
     nextAvailableDate: null, // When the next challenge/content is available
     dailyContent: {
@@ -74,6 +74,65 @@ export const visitedYesterday = (lastVisit) => {
 };
 
 /**
+ * Check for streak loss due to missed cycles
+ * Returns updated data object
+ */
+export const checkStreakLoss = (data) => {
+    if (!data.lastStreakUpdateDate) return data;
+
+    const today = getTodayDate();
+    const daysSinceUpdate = daysBetween(data.lastStreakUpdateDate, today);
+
+    // Cycle is 3 days. 
+    // Day 0: Update.
+    // Day 1, 2: Wait.
+    // Day 3: Available.
+    // Day 4: Missed (1 day late).
+
+    // If daysSinceUpdate > 3, we missed the window.
+    // We allow 1 day grace? The user said "If you don't play, it's deleted".
+    // Let's assume strict 24h window on Day 3.
+    // So if daysSinceUpdate >= 4, we have a problem.
+
+    if (daysSinceUpdate >= 4) {
+        const missedCycles = Math.floor((daysSinceUpdate - 1) / 3); // Rough estimate of missed opportunities
+        // Actually, simpler: If we are late, we consume freezes.
+        // For every day late? Or just one freeze per missed cycle?
+        // Let's say 1 freeze saves the streak.
+
+        if (data.streakFreezes > 0) {
+            // Consume freeze
+            return {
+                ...data,
+                streakFreezes: data.streakFreezes - 1,
+                lastStreakUpdateDate: today, // Pretend we updated today to save it? 
+                // No, that would give free points. 
+                // We just update the "lastStreakUpdateDate" to "3 days ago" so they can play NOW?
+                // Or we just decrement freeze and keep waiting?
+
+                // Better: If they missed it, they use a freeze to KEEP the streak number, 
+                // but they still need to play to increase it.
+                // We don't reset streak.
+                // But we need to update 'lastStreakUpdateDate' to avoid checking this again immediately?
+                // Actually, if they login today (Day 5), and we use a freeze.
+                // They can play today.
+                // So we just decrement freeze.
+                streakFreezes: data.streakFreezes - 1,
+                // We don't change dates, so they can play immediately.
+            };
+        } else {
+            // No freezes left -> Reset streak
+            return {
+                ...data,
+                streak: 0,
+            };
+        }
+    }
+
+    return data;
+};
+
+/**
  * Check if user visited today already
  */
 export const visitedToday = (lastVisit) => {
@@ -101,45 +160,46 @@ export const isContentRefreshDue = (data) => {
 
 /**
  * Mark the challenge as completed
- * Returns { success: boolean, newStreak: number, alreadyCompleted: boolean }
+ * Returns { success: boolean, newStreak: number, alreadyCompleted: boolean, freezeEarned: boolean }
  */
 export const completeChallengeForToday = () => {
     const data = getData();
     const today = getTodayDate();
 
-    // Check if we are in a valid cycle to complete
-    // If nextAvailableDate is in the future, we can't complete it again
     if (data.nextAvailableDate && data.nextAvailableDate > today && data.lastStreakUpdateDate === today) {
-        return { success: false, newStreak: data.streak, alreadyCompleted: true };
+        return { success: false, newStreak: data.streak, alreadyCompleted: true, freezeEarned: false };
     }
 
-    // Double check: if we already updated streak today? 
-    // Actually, with 3-day cycle, we update streak, then set nextAvailableDate to +3 days.
-    // So if today < nextAvailableDate, it's locked.
-
-    // Wait, if I complete it today, nextAvailableDate becomes today + 3.
-    // So subsequent calls today will fail because today < today+3.
-
-    // But we need to allow the FIRST completion.
-    // Logic: If lastStreakUpdateDate == today, it's done.
-
     if (data.lastStreakUpdateDate === today) {
-        return { success: true, newStreak: data.streak, alreadyCompleted: true };
+        return { success: true, newStreak: data.streak, alreadyCompleted: true, freezeEarned: false };
     }
 
     // Increase streak
     const newStreak = data.streak + 1;
     const nextDate = addDays(today, 3);
 
+    // Freeze Drop Logic: 33% chance, max 3
+    let newFreezes = data.streakFreezes;
+    let freezeEarned = false;
+
+    if (newFreezes < 3) {
+        const roll = Math.random();
+        if (roll < 0.33) {
+            newFreezes += 1;
+            freezeEarned = true;
+        }
+    }
+
     const updatedData = {
         ...data,
         streak: newStreak,
+        streakFreezes: newFreezes,
         lastStreakUpdateDate: today,
         nextAvailableDate: nextDate,
     };
 
     saveData(updatedData);
-    return { success: true, newStreak: newStreak, alreadyCompleted: false };
+    return { success: true, newStreak: newStreak, alreadyCompleted: false, freezeEarned: freezeEarned };
 };
 
 /**

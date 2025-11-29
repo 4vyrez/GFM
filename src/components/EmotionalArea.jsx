@@ -16,11 +16,11 @@ const EmotionalArea = ({ photo, message }) => {
 
     return (
         <div
-            className={`relative max-w-2xl mx-auto transform transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            className={`relative max-w-md mx-auto transform transition-all duration-1000 ease-apple ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
         >
             {/* Glassmorphism Card */}
-            <div className="bg-white/80 backdrop-blur-md shadow-xl rounded-3xl overflow-hidden border border-white/50 transition-all duration-500">
+            <div className="bg-white/80 backdrop-blur-md shadow-xl rounded-3xl overflow-hidden border border-white/50 transition-all duration-500 ease-apple">
 
                 {/* Image Banner */}
                 <div className="relative h-64 sm:h-80 w-full overflow-hidden group">

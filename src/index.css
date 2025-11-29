@@ -7,9 +7,10 @@
 @layer base {
   body {
     @apply bg-gradient-to-br from-pastel-beige via-pastel-pink to-pastel-lavender;
-    @apply min-h-screen;
+    @apply min-h-screen h-screen overflow-hidden;
     @apply font-sans;
     @apply antialiased;
+    overscroll-behavior-y: none;
   }
 }
 
