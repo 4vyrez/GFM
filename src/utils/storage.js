@@ -1,3 +1,5 @@
+import { games, getGameById } from '../data/games';
+
 // LocalStorage key
 const STORAGE_KEY = 'gfm_app_data';
 
@@ -12,6 +14,11 @@ const defaultData = {
     streakFreezes: 0, // Start with 0
     lastStreakUpdateDate: null,
     nextAvailableDate: null, // When the next challenge/content is available
+    totalVisits: 0, // Track total visits for specials
+    playedGames: [], // History of played games: [{ gameId, date, won, attempts }]
+    gameResults: [], // Performance metrics: [{ gameId, metric, value, date, player }]
+    unlockedSpecials: [], // IDs of unlocked specials
+    currentGameId: null, // Current game available to play
     dailyContent: {
         date: null,
         photoId: null,
@@ -159,10 +166,61 @@ export const isContentRefreshDue = (data) => {
 };
 
 /**
+ * Get the next game for the current cycle
+ * Uses intelligent scheduling to ensure variety and appropriate difficulty
+ */
+export const getNextGameForCycle = (data) => {
+    const { playedGames = [], streak = 0 } = data;
+    const today = getTodayDate();
+
+    // Filter games not played in the last 30 days
+    const recentGames = playedGames
+        .filter(pg => daysBetween(pg.date, today) <= 30)
+        .map(pg => pg.gameId);
+
+    const availableGames = games.filter(game => !recentGames.includes(game.id));
+
+    // If all games were played recently, allow any game
+    const pool = availableGames.length > 0 ? availableGames : games;
+
+    // Determine difficulty tier based on streak
+    // 0-9: easy, 10-29: medium, 30+: mix of all
+    let preferredDifficulty;
+    if (streak < 10) {
+        preferredDifficulty = 'easy';
+    } else if (streak < 30) {
+        preferredDifficulty = 'medium';
+    } else {
+        // Mix of all difficulties
+        preferredDifficulty = null;
+    }
+
+    // Filter by preferred difficulty if set
+    let filteredPool = pool;
+    if (preferredDifficulty) {
+        const difficultyGames = pool.filter(g => g.difficulty === preferredDifficulty);
+        if (difficultyGames.length > 0) {
+            filteredPool = difficultyGames;
+        }
+    }
+
+    // Select random game from filtered pool
+    return filteredPool[Math.floor(Math.random() * filteredPool.length)];
+};
+
+/**
+ * Check if user has already completed the challenge today
+ */
+export const hasCompletedChallengeToday = (data) => {
+    const today = getTodayDate();
+    return data.lastStreakUpdateDate === today;
+};
+
+/**
  * Mark the challenge as completed
  * Returns { success: boolean, newStreak: number, alreadyCompleted: boolean, freezeEarned: boolean }
  */
-export const completeChallengeForToday = () => {
+export const completeChallengeForToday = (gameData = {}) => {
     const data = getData();
     const today = getTodayDate();
 
@@ -190,12 +248,23 @@ export const completeChallengeForToday = () => {
         }
     }
 
+    // Add game to history
+    const playedGames = data.playedGames || [];
+    playedGames.push({
+        gameId: gameData.gameId || data.currentGameId || 'unknown',
+        date: today,
+        won: true,
+        attempts: gameData.attempts || 1,
+        completionTime: gameData.time || null,
+    });
+
     const updatedData = {
         ...data,
         streak: newStreak,
         streakFreezes: newFreezes,
         lastStreakUpdateDate: today,
         nextAvailableDate: nextDate,
+        playedGames,
     };
 
     saveData(updatedData);
@@ -241,3 +310,86 @@ export const SPECIAL_MESSAGE = {
     id: SPECIAL_MESSAGE_ID,
     text: SPECIAL_MESSAGE_TEXT
 };
+
+/**
+ * Save a game result for comparison
+ * @param {string} gameId - The game identifier
+ * @param {string} metric - The metric type (e.g., 'moves', 'milliseconds', 'attempts')
+ * @param {number} value - The performance value
+ */
+export const saveGameResult = (gameId, metric, value) => {
+    const data = getData();
+    const today = getTodayDate();
+
+    const gameResults = data.gameResults || [];
+    gameResults.push({
+        gameId,
+        metric,
+        value,
+        date: today,
+        player: 'user'
+    });
+
+    const updatedData = {
+        ...data,
+        gameResults
+    };
+
+    saveData(updatedData);
+};
+
+/**
+ * Get comparison data for a game
+ * Returns { user: { metric, value }, partner: { metric, value } }
+ * Partner data is dummy until real data is available
+ */
+export const getGameComparison = (gameId) => {
+    const data = getData();
+    const game = getGameById(gameId);
+
+    if (!game) return null;
+
+    // Get user's most recent result for this game
+    const gameResults = data.gameResults || [];
+    const userResults = gameResults.filter(r => r.gameId === gameId && r.player === 'user');
+    const userResult = userResults.length > 0 ? userResults[userResults.length - 1] : null;
+
+    // Get partner data (dummy for now)
+    const partnerResult = game.dummyPartnerScore || { metric: 'unknown', value: 0 };
+
+    return {
+        user: userResult ? { metric: userResult.metric, value: userResult.value } : null,
+        partner: partnerResult
+    };
+};
+
+/**
+ * Get metric label in German
+ */
+export const getMetricLabel = (metric) => {
+    const labels = {
+        'moves': 'Züge',
+        'milliseconds': 'Millisekunden',
+        'attempts': 'Versuche',
+        'level': 'Level',
+        'flips': 'Züge',
+        'seconds': 'Sekunden',
+        'correct': 'Richtige Antworten'
+    };
+    return labels[metric] || metric;
+};
+
+/**
+ * Format metric value for display
+ */
+export const formatMetricValue = (metric, value) => {
+    switch (metric) {
+        case 'milliseconds':
+            return `${value}ms`;
+        case 'seconds':
+            return `${value}s`;
+        default:
+            return value.toString();
+    }
+};
+

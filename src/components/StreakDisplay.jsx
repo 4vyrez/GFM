@@ -1,9 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getTodayDate } from '../utils/storage';
+import { FlameIcon, StreakFreezeIcon } from './icons/Icons';
+import InfoButton from './ui/InfoButton';
 
-const StreakDisplay = ({ streak, hasFreeze, lastUpdate, nextAvailableDate, isCompact = false }) => {
+const StreakDisplay = ({ streak, streakFreezes = 0, lastUpdate, nextAvailableDate, isCompact = false }) => {
     const isUpdatedToday = lastUpdate === getTodayDate();
     const [timeLeft, setTimeLeft] = useState('');
+    const [isAnimating, setIsAnimating] = useState(false);
+    const prevStreak = useRef(streak);
+
+    // Animate when streak changes
+    useEffect(() => {
+        if (prevStreak.current !== streak) {
+            setIsAnimating(true);
+            setTimeout(() => setIsAnimating(false), 600);
+            prevStreak.current = streak;
+        }
+    }, [streak]);
 
     useEffect(() => {
         const calculateTimeLeft = () => {
@@ -41,75 +54,133 @@ const StreakDisplay = ({ streak, hasFreeze, lastUpdate, nextAvailableDate, isCom
 
     return (
         <div className={`
-            relative transition-all duration-700 ease-apple z-20
-            ${isCompact
-                ? 'bg-white/90 backdrop-blur-md shadow-sm max-w-md mx-auto h-16 rounded-2xl mb-6'
-                : 'card max-w-md mx-auto h-64 mb-8'
-            }
+            max-w-md mx-auto relative
+            bg-white/85 backdrop-blur-glass
+            rounded-3xl
+            border border-white/60
+            overflow-hidden
+            transition-all duration-500 ease-apple
+            ${isCompact ? 'mb-4 p-4' : 'mb-8 p-6'}
+            ${isUpdatedToday ? 'shadow-glow-orange' : 'shadow-glass'}
         `}>
-            {/* Flame Icon */}
-            <div className={`
-                absolute transition-all duration-700 ease-apple flex items-center justify-center
-                ${isCompact
-                    ? 'top-2 left-4 w-12 h-12 text-3xl'
-                    : 'top-8 left-1/2 -translate-x-1/2 w-24 h-24 text-7xl'
-                }
-            `}>
-                <span className={`filter drop-shadow-sm transition-all duration-700 ease-apple ${isUpdatedToday ? 'animate-pulse' : 'grayscale-[0.3]'}`}>
-                    🔥
-                </span>
-                {hasFreeze && (
-                    <span className={`
-                        absolute -top-1 -right-1 transition-all duration-500 ease-apple
-                        ${isCompact ? 'text-xs' : 'text-xl'}
-                    `}>
-                        ❄️
-                    </span>
-                )}
-            </div>
+            {/* Animated background glow when active */}
+            {isUpdatedToday && (
+                <div className="absolute inset-0 -z-10 overflow-hidden">
+                    <div className="absolute -inset-4 bg-gradient-to-br from-orange-200/30 via-yellow-100/20 to-orange-100/30 animate-pulse-glow blur-xl" />
+                </div>
+            )}
 
-            {/* Streak Count */}
-            <div className={`
-                absolute transition-all duration-700 ease-apple flex flex-col justify-center
-                ${isCompact
-                    ? 'top-2 left-16 h-12 items-start'
-                    : 'top-32 left-1/2 -translate-x-1/2 items-center'
-                }
-            `}>
-                <p className={`
-                    font-bold transition-all duration-700 ease-apple whitespace-nowrap
-                    ${isCompact ? 'text-xl' : 'text-5xl'} 
-                    ${isUpdatedToday ? 'text-orange-500' : 'text-gray-700'}
-                `}>
-                    {streak}
+            {/* Info Button - Top Right */}
+            <InfoButton className="absolute top-3 right-3 z-30">
+                <div className="flex items-center gap-2 mb-2">
+                    <StreakFreezeIcon className="w-4 h-4" />
+                    <span className="font-bold text-gray-800">Streak Freeze</span>
+                </div>
+                <p className="leading-relaxed text-gray-500">
+                    Sammle bis zu 3 Kristalle. Ein Kristall friert deinen Streak ein, wenn du mal einen Tag verpasst.
                 </p>
-                {!isCompact && (
-                    <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold mt-1 opacity-100 transition-opacity duration-300 ease-apple">
-                        Deine Streak
-                    </p>
-                )}
+            </InfoButton>
+
+            {/* Streak Freezes - Top Left with stagger animation */}
+            <div className={`
+                absolute left-4 flex items-center gap-1.5 transition-all duration-500
+                ${isCompact ? 'top-3' : 'top-4'}
+            `}>
+                {[...Array(3)].map((_, i) => (
+                    <div
+                        key={i}
+                        style={{ animationDelay: `${i * 100}ms` }}
+                        className={`
+                            transition-all duration-300 transform
+                            ${i < streakFreezes ? 'animate-bounce-in opacity-100 scale-100' : 'opacity-30 scale-90'}
+                        `}
+                    >
+                        <StreakFreezeIcon
+                            className={`
+                                transition-all duration-300
+                                ${isCompact ? 'w-5 h-5' : 'w-7 h-7'}
+                            `}
+                            used={i >= streakFreezes}
+                        />
+                    </div>
+                ))}
             </div>
 
-            {/* Timer / Status Text */}
+            {/* Main Content with animated layout */}
             <div className={`
-                absolute transition-all duration-700 ease-apple flex items-center
-                ${isCompact
-                    ? 'top-0 right-6 h-16 justify-end'
-                    : 'bottom-6 left-0 right-0 justify-center'
-                }
+                flex items-center
+                transition-all duration-500 ease-apple
+                ${isCompact ? 'flex-row gap-4 pt-0' : 'flex-col pt-10'}
             `}>
-                <div className={`flex flex-col ${isCompact ? 'items-end' : 'items-center'}`}>
-                    {/* Progress Dots (Only visible in large mode or simplified in compact) */}
-                    <div className={`flex gap-1.5 transition-all duration-700 ease-apple ${isCompact ? 'opacity-0 h-0 w-0 overflow-hidden' : 'mb-2 opacity-100'}`}>
-                        {[...Array(3)].map((_, i) => (
-                            <div
-                                key={i}
-                                className={`rounded-full transition-all duration-500 ease-apple ${i < 3 ? 'bg-pastel-pink' : 'bg-gray-200'} h-2 w-2`}
-                            />
-                        ))}
-                    </div>
+                {/* Flame Icon Container with glow */}
+                <div className={`
+                    relative
+                    transition-all duration-500 ease-apple flex-shrink-0
+                    ${isCompact ? 'w-14 h-14' : 'w-36 h-36 mb-2'}
+                `}>
+                    {/* Ambient glow behind flame */}
+                    {isUpdatedToday && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <div className={`
+                                rounded-full bg-gradient-to-br from-orange-400/40 to-yellow-300/30
+                                animate-pulse-glow blur-lg
+                                ${isCompact ? 'w-12 h-12' : 'w-28 h-28'}
+                            `} />
+                        </div>
+                    )}
 
-                    <span className={`font-medium text-gray-400 transition-all duration-700 ease-apple whitespace-nowrap ${isCompact ? 'text-xs' : 'text-sm'}`}>
+                    <FlameIcon
+                        className={`
+                            w-full h-full relative z-10
+                            transition-all duration-300
+                            ${isUpdatedToday ? 'drop-shadow-lg' : 'opacity-40 grayscale'}
+                        `}
+                        animated={isUpdatedToday}
+                    />
+                </div>
+
+                {/* Text Content */}
+                <div className={`
+                    transition-all duration-500 ease-apple
+                    ${isCompact ? 'flex items-center gap-3' : 'flex flex-col items-center text-center'}
+                `}>
+                    {/* Streak Count with animation */}
+                    <span className={`
+                        font-black tracking-tight transition-all duration-500
+                        ${isCompact ? 'text-4xl' : 'text-8xl'}
+                        ${isUpdatedToday ? 'text-gradient-warm' : 'text-gray-300'}
+                        ${isAnimating ? 'animate-bounce-in' : ''}
+                    `}>
+                        {streak}
+                    </span>
+
+                    {/* Label - only shown in full mode */}
+                    <span className={`
+                        text-sm uppercase tracking-widest font-bold
+                        transition-all duration-500
+                        ${isUpdatedToday ? 'text-orange-400/80' : 'text-gray-400'}
+                        ${isCompact ? 'hidden' : 'mt-1 mb-4'}
+                    `}>
+                        Tage Streak
+                    </span>
+                </div>
+
+                {/* Timer Pill - only in full mode */}
+                <div className={`
+                    transition-all duration-500
+                    ${isCompact ? 'hidden' : 'block'}
+                `}>
+                    <span className={`
+                        inline-flex items-center gap-2
+                        text-xs font-semibold
+                        bg-gradient-to-r from-gray-100/80 to-gray-50/80
+                        backdrop-blur-xs
+                        px-5 py-2.5 rounded-full
+                        border border-gray-200/50
+                        text-gray-500
+                        shadow-sm
+                    `}>
+                        {timeLeft === 'Bereit!' && <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />}
                         {timeLeft}
                     </span>
                 </div>

@@ -1,37 +1,40 @@
 import { useState, useEffect } from 'react';
+import { SparkleIcon } from '../icons/Icons';
 
 const TicTacToe = ({ onWin }) => {
     const [board, setBoard] = useState(Array(9).fill(null));
     const [isPlayerTurn, setIsPlayerTurn] = useState(true);
-    const [gameStatus, setGameStatus] = useState('playing'); // 'playing', 'won', 'lost', 'draw'
+    const [gameStatus, setGameStatus] = useState('playing');
     const [attempts, setAttempts] = useState(1);
+    const [moveCount, setMoveCount] = useState(0);
     const [isVisible, setIsVisible] = useState(false);
+    const [winningLine, setWinningLine] = useState([]);
+    const [lastMove, setLastMove] = useState(null);
 
     useEffect(() => {
         setTimeout(() => setIsVisible(true), 100);
     }, []);
 
     useEffect(() => {
-        // Bot makes move after player
         if (!isPlayerTurn && gameStatus === 'playing') {
             const timer = setTimeout(() => {
                 makeBotMove();
-            }, 600); // Slightly longer delay for natural feel
+            }, 700);
             return () => clearTimeout(timer);
         }
     }, [isPlayerTurn, gameStatus]);
 
     const checkWinner = (squares) => {
         const lines = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-            [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
-            [0, 4, 8], [2, 4, 6], // diagonals
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6],
         ];
 
         for (let line of lines) {
             const [a, b, c] = line;
             if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-                return squares[a];
+                return { winner: squares[a], line };
             }
         }
         return null;
@@ -43,11 +46,14 @@ const TicTacToe = ({ onWin }) => {
         const newBoard = [...board];
         newBoard[index] = 'X';
         setBoard(newBoard);
+        setMoveCount(prev => prev + 1);
+        setLastMove(index);
 
-        const winner = checkWinner(newBoard);
-        if (winner) {
+        const result = checkWinner(newBoard);
+        if (result) {
             setGameStatus('won');
-            if (onWin) onWin(attempts);
+            setWinningLine(result.line);
+            if (onWin) onWin({ gameId: 'tictactoe-1', metric: 'moves', value: moveCount + 1 });
             return;
         }
 
@@ -69,50 +75,38 @@ const TicTacToe = ({ onWin }) => {
 
         let moveIndex = -1;
 
-        // Helper to check if a move leads to a win for a specific player
         const findWinningMove = (player) => {
             for (let index of emptyIndices) {
                 const tempBoard = [...newBoard];
                 tempBoard[index] = player;
-                if (checkWinner(tempBoard) === player) {
+                if (checkWinner(tempBoard)?.winner === player) {
                     return index;
                 }
             }
             return -1;
         };
 
-        // 1. Try to win
         moveIndex = findWinningMove('O');
-
-        // 2. Block player from winning
-        if (moveIndex === -1) {
-            moveIndex = findWinningMove('X');
-        }
-
-        // 3. Take center if available
-        if (moveIndex === -1 && newBoard[4] === null) {
-            moveIndex = 4;
-        }
-
-        // 4. Take random corner
+        if (moveIndex === -1) moveIndex = findWinningMove('X');
+        if (moveIndex === -1 && newBoard[4] === null) moveIndex = 4;
         if (moveIndex === -1) {
             const corners = [0, 2, 6, 8].filter(idx => newBoard[idx] === null);
             if (corners.length > 0) {
                 moveIndex = corners[Math.floor(Math.random() * corners.length)];
             }
         }
-
-        // 5. Take random available spot
         if (moveIndex === -1) {
             moveIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
         }
 
         newBoard[moveIndex] = 'O';
         setBoard(newBoard);
+        setLastMove(moveIndex);
 
-        const winner = checkWinner(newBoard);
-        if (winner) {
+        const result = checkWinner(newBoard);
+        if (result) {
             setGameStatus('lost');
+            setWinningLine(result.line);
             return;
         }
 
@@ -129,6 +123,9 @@ const TicTacToe = ({ onWin }) => {
         setIsPlayerTurn(true);
         setGameStatus('playing');
         setAttempts(prev => prev + 1);
+        setMoveCount(0);
+        setWinningLine([]);
+        setLastMove(null);
     };
 
     const getStatusMessage = () => {
@@ -140,54 +137,93 @@ const TicTacToe = ({ onWin }) => {
 
     return (
         <div
-            className={`flex flex-col items-center transform transition-all duration-700 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-                }`}
+            className={`
+                flex flex-col items-center
+                transform transition-all duration-700 ease-apple
+                ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}
+            `}
         >
-            <div className="text-center mb-6">
-                <div className="inline-block bg-white/80 px-3 py-1 rounded-full text-xs font-bold text-gray-400 mb-2 shadow-sm">
-                    Versuch #{attempts}
+            {/* Status Header */}
+            <div className="text-center mb-6 w-full">
+                <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-xs px-4 py-1.5 rounded-full text-xs font-bold text-gray-400 mb-3 shadow-sm border border-white/50">
+                    <span>Versuch #{attempts}</span>
+                    {gameStatus === 'playing' && (
+                        <>
+                            <span className="w-1 h-1 rounded-full bg-gray-300" />
+                            <span>{moveCount} Züge</span>
+                        </>
+                    )}
                 </div>
-                <p className={`text-xl font-medium transition-colors duration-300 ${gameStatus === 'won' ? 'text-green-500 scale-110' :
-                    gameStatus === 'lost' ? 'text-red-400' : 'text-gray-700'
-                    }`}>
+
+                <p className={`
+                    text-xl font-bold transition-all duration-300
+                    ${gameStatus === 'won' ? 'text-green-500 scale-105' :
+                        gameStatus === 'lost' ? 'text-red-400' : 'text-gray-700'}
+                `}>
                     {getStatusMessage()}
                 </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 w-full max-w-sm mx-auto mb-8 p-4 bg-white/50 rounded-2xl shadow-sm">
-                {board.map((cell, index) => (
-                    <button
-                        key={index}
-                        onClick={() => handleClick(index)}
-                        disabled={!isPlayerTurn || gameStatus !== 'playing' || cell !== null}
-                        className={`
-                            aspect-square rounded-xl text-4xl sm:text-5xl font-bold
-                            flex items-center justify-center
-                            transition-all duration-200 shadow-sm
-                            ${cell === null
-                                ? 'bg-white hover:bg-gray-50 hover:shadow-md cursor-pointer'
-                                : 'bg-white/90 cursor-default'
-                            }
-                            ${cell === 'X' ? 'text-pastel-pink scale-100' : 'text-pastel-lavender scale-100'}
-                            ${(!isPlayerTurn || gameStatus !== 'playing') && cell === null ? 'opacity-80 cursor-not-allowed' : ''}
-                        `}
-                    >
-                        {cell && (
-                            <span className="animate-pop-in">
-                                {cell}
-                            </span>
-                        )}
-                    </button>
-                ))}
+            {/* Game Board with 3D perspective */}
+            <div className="perspective-1000 w-full max-w-sm mx-auto mb-8">
+                <div className="grid grid-cols-3 gap-3 p-5 bg-gradient-to-br from-white/70 to-white/50 backdrop-blur-sm rounded-3xl shadow-glass border border-white/50">
+                    {board.map((cell, index) => {
+                        const isWinningCell = winningLine.includes(index);
+                        const isLastMoveCell = lastMove === index;
+
+                        return (
+                            <button
+                                key={index}
+                                onClick={() => handleClick(index)}
+                                disabled={!isPlayerTurn || gameStatus !== 'playing' || cell !== null}
+                                className={`
+                                    game-cell
+                                    text-4xl sm:text-5xl font-black
+                                    ${cell === null && isPlayerTurn && gameStatus === 'playing'
+                                        ? 'hover:bg-pastel-pink/10 hover:border-pastel-pink/30'
+                                        : ''}
+                                    ${isWinningCell ? 'bg-green-100 border-green-300 shadow-glow-pink' : ''}
+                                    ${isLastMoveCell && cell ? 'animate-pop-in' : ''}
+                                    ${(!isPlayerTurn || gameStatus !== 'playing') && cell === null
+                                        ? 'opacity-60 cursor-not-allowed' : ''}
+                                `}
+                            >
+                                {cell && (
+                                    <span className={`
+                                        inline-block
+                                        ${cell === 'X'
+                                            ? 'text-gradient-warm'
+                                            : 'text-pastel-lavender'}
+                                    `}>
+                                        {cell}
+                                    </span>
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
+            {/* Result Actions */}
             {gameStatus !== 'playing' && (
-                <button
-                    onClick={resetGame}
-                    className="px-8 py-3 bg-white text-gray-700 font-medium rounded-full shadow-md hover:shadow-lg hover:bg-gray-50 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
-                >
-                    Nochmal spielen 🔄
-                </button>
+                <div className="flex flex-col items-center gap-3 animate-slide-up">
+                    {gameStatus === 'won' && (
+                        <div className="flex items-center gap-2 text-green-500 mb-2">
+                            <SparkleIcon className="w-5 h-5" />
+                            <span className="text-sm font-bold">
+                                {moveCount <= 3 ? 'Perfekt! 🌟' : moveCount <= 5 ? 'Sehr gut! ✨' : 'Geschafft! 💪'}
+                            </span>
+                            <SparkleIcon className="w-5 h-5" />
+                        </div>
+                    )}
+
+                    <button
+                        onClick={resetGame}
+                        className="btn-secondary"
+                    >
+                        Nochmal spielen 🔄
+                    </button>
+                </div>
             )}
         </div>
     );

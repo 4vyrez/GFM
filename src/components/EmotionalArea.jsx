@@ -1,71 +1,166 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { FlowerIcon, CameraIcon, SparkleIcon } from './icons/Icons';
+import Card from './ui/Card';
 
 const EmotionalArea = ({ photo, message }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [textRevealed, setTextRevealed] = useState(false);
+    const messageRef = useRef(null);
 
     useEffect(() => {
-        // Fade in animation on mount
-        setTimeout(() => setIsVisible(true), 100);
+        // Staggered entrance animations
+        const timer1 = setTimeout(() => setIsVisible(true), 100);
+        const timer2 = setTimeout(() => setTextRevealed(true), 800);
+        return () => {
+            clearTimeout(timer1);
+            clearTimeout(timer2);
+        };
+    }, []);
+
+    useEffect(() => {
         // Reset expansion when message changes
         setIsExpanded(false);
+        setTextRevealed(false);
+        setTimeout(() => setTextRevealed(true), 300);
     }, [message]);
 
     const isLongText = message.text.length > 120;
     const displayedText = isExpanded || !isLongText ? message.text : message.text.slice(0, 120) + '...';
 
+    // Split text into words for reveal animation
+    const words = displayedText.split(' ');
+
     return (
         <div
-            className={`relative max-w-md mx-auto transform transition-all duration-1000 ease-apple ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
+            className={`
+                relative max-w-md mx-auto
+                transform transition-all duration-1000 ease-apple
+                ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
+            `}
         >
-            {/* Glassmorphism Card */}
-            <div className="bg-white/80 backdrop-blur-md shadow-xl rounded-3xl overflow-hidden border border-white/50 transition-all duration-500 ease-apple">
+            <Card
+                className="overflow-hidden !p-0 group"
+                variant="glass"
+                hover
+            >
+                {/* Image Banner with Ken Burns */}
+                <div className="relative h-72 sm:h-80 w-full overflow-hidden">
+                    {/* Placeholder shimmer while loading */}
+                    {!imageLoaded && (
+                        <div className="absolute inset-0 bg-gradient-to-br from-pastel-pink/30 to-pastel-lavender/30 animate-pulse" />
+                    )}
 
-                {/* Image Banner */}
-                <div className="relative h-64 sm:h-80 w-full overflow-hidden group">
                     <img
                         src={`/photos/${photo.filename}`}
                         alt={photo.alt}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        onLoad={() => setImageLoaded(true)}
+                        className={`
+                            w-full h-full object-cover
+                            transition-all duration-1000 ease-apple
+                            ken-burns
+                            ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}
+                        `}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
 
-                    {/* Optional: Photo Label/Date if available, or just a nice icon */}
-                    <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-700 shadow-sm">
-                        📸 Erinnerung
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+
+                    {/* Animated border ring */}
+                    <div className="absolute inset-0 border-4 border-white/20 rounded-t-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    {/* Photo Label with glass effect */}
+                    <div className={`
+                        absolute bottom-4 right-4
+                        bg-white/90 backdrop-blur-sm
+                        px-4 py-1.5 rounded-xl
+                        text-xs font-bold text-gray-700
+                        shadow-md
+                        flex items-center gap-2
+                        border border-white/50
+                        transform transition-all duration-300
+                        ${imageLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}
+                    `}>
+                        <CameraIcon className="w-4 h-4" />
+                        <span>Erinnerung</span>
+                    </div>
+
+                    {/* Floating sparkles decoration */}
+                    <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-100">
+                        <SparkleIcon className="w-5 h-5" />
+                    </div>
+                    <div className="absolute top-8 right-8 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-200">
+                        <SparkleIcon className="w-4 h-4" />
                     </div>
                 </div>
 
                 {/* Content Section */}
-                <div className="p-8 sm:p-10 text-center">
-                    <div className="mb-6">
-                        <span className="text-4xl">🌸</span>
+                <div className="p-8 sm:p-10 text-center bg-gradient-to-b from-white/80 to-white/95">
+                    {/* Decorative flower */}
+                    <div className={`
+                        mb-6 flex justify-center
+                        transition-all duration-700 delay-300
+                        ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}
+                    `}>
+                        <div className="relative">
+                            <FlowerIcon className="w-12 h-12 animate-float-slow" />
+                            {/* Subtle glow */}
+                            <div className="absolute inset-0 bg-pastel-pink/30 rounded-full blur-lg -z-10" />
+                        </div>
                     </div>
 
-                    <div className={`relative transition-all duration-500 ${isExpanded ? 'mb-4' : ''}`}>
+                    {/* Message with word-by-word reveal */}
+                    <div
+                        ref={messageRef}
+                        className={`relative transition-all duration-500 ${isExpanded ? 'mb-4' : ''}`}
+                    >
                         <p
-                            className="text-2xl md:text-3xl font-serif text-gray-800 leading-relaxed italic transition-all duration-300"
+                            className="text-2xl md:text-3xl font-serif text-gray-800 leading-relaxed italic cursor-pointer"
                             onClick={() => isLongText && setIsExpanded(!isExpanded)}
                         >
-                            "{displayedText}"
+                            "
+                            {words.map((word, index) => (
+                                <span
+                                    key={index}
+                                    style={{
+                                        animationDelay: `${index * 50}ms`,
+                                        display: 'inline-block'
+                                    }}
+                                    className={`
+                                        transition-all duration-300
+                                        ${textRevealed
+                                            ? 'opacity-100 translate-y-0 blur-0'
+                                            : 'opacity-0 translate-y-2 blur-sm'}
+                                    `}
+                                >
+                                    {word}{index < words.length - 1 ? '\u00A0' : ''}
+                                </span>
+                            ))}
+                            "
                         </p>
 
                         {isLongText && (
                             <button
                                 onClick={() => setIsExpanded(!isExpanded)}
-                                className="mt-4 text-sm text-gray-500 hover:text-pastel-pink font-medium transition-colors focus:outline-none"
+                                className={`
+                                    mt-6 text-sm font-bold uppercase tracking-wide
+                                    text-gray-400 hover:text-pastel-pink
+                                    transition-all duration-300
+                                    flex items-center justify-center gap-2 mx-auto
+                                    group/btn
+                                `}
                             >
-                                {isExpanded ? 'Weniger anzeigen' : 'Alles lesen ✨'}
+                                <span>{isExpanded ? 'Weniger anzeigen' : 'Alles lesen'}</span>
+                                <SparkleIcon className={`
+                                    w-4 h-4 transition-transform duration-300
+                                    ${isExpanded ? 'rotate-180' : 'group-hover/btn:rotate-12'}
+                                `} />
                             </button>
                         )}
                     </div>
-
-                    <div className="mt-8 flex justify-center">
-                        <div className="h-1 w-16 bg-pastel-pink rounded-full opacity-50"></div>
-                    </div>
                 </div>
-            </div>
+            </Card>
         </div>
     );
 };
