@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+@import './themes.css';
 
 @tailwind base;
 @tailwind components;
@@ -17,7 +18,10 @@
         hsl(200, 80%, 90%) 75%,
         hsl(30, 100%, 92%) 100%);
     background-size: 400% 400%;
-    animation: gradient-aurora 15s ease infinite;
+    /* Slowed down for better performance */
+    animation: gradient-aurora 30s ease infinite;
+    /* Performance: use GPU compositing */
+    transform: translateZ(0);
   }
 
   /* Custom scrollbar */
@@ -425,4 +429,29 @@
 
 .particle {
   animation: particleFloat 4s ease-in-out infinite;
+}
+
+/* Particle float animation for BackgroundParticles */
+@keyframes particle-float {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.animate-particle-float {
+  animation: particle-float linear infinite;
 }

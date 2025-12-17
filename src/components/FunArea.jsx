@@ -21,8 +21,8 @@ const FunArea = ({ children, gameDescription }) => {
                 <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-pastel-lavender/40 to-pastel-pink/40 rounded-full blur-3xl" />
                 <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-br from-pastel-mint/30 to-pastel-blue/30 rounded-full blur-2xl" />
 
-                {/* Info Button - Top Right */}
-                <InfoButton className="absolute top-3 right-3 z-30">
+                {/* Info Button - Top Right - FIXED: consistent z-index with themes */}
+                <InfoButton className="absolute top-3 right-3 z-50" position="right">
                     {gameDescription || 'Spiele das Spiel, um deinen Streak zu behalten.'}
                 </InfoButton>
 

@@ -1,4 +1,5 @@
 import { games, getGameById } from '../data/games';
+import { getNextPhoto } from '../data/content';
 
 // LocalStorage key
 const STORAGE_KEY = 'gfm_app_data';
@@ -11,7 +12,9 @@ const SPECIAL_MESSAGE_TEXT = "Heute wirst du deine 18te Flamme bekommen, daran i
 const defaultData = {
     lastVisit: null,
     streak: 0,
+    longestStreak: 0, // Track best streak achieved
     streakFreezes: 0, // Start with 0
+    freezesUsed: 0, // Track total freezes consumed
     lastStreakUpdateDate: null,
     nextAvailableDate: null, // When the next challenge/content is available
     totalVisits: 0, // Track total visits for specials
@@ -19,6 +22,9 @@ const defaultData = {
     gameResults: [], // Performance metrics: [{ gameId, metric, value, date, player }]
     unlockedSpecials: [], // IDs of unlocked specials
     currentGameId: null, // Current game available to play
+    shownPhotoIds: [], // Track shown photos to prevent repeats
+    shownMessageIds: [], // Track shown messages to prevent repeats
+    moodReactions: {}, // Track mood reactions by date: { '2025-12-15': '❤️' }
     dailyContent: {
         date: null,
         photoId: null,
@@ -167,21 +173,20 @@ export const isContentRefreshDue = (data) => {
 
 /**
  * Get the next game for the current cycle
- * Uses intelligent scheduling to ensure variety and appropriate difficulty
+ * Uses weighted scheduling: unplayed games get higher probability
+ * - Never played: 3x weight
+ * - Played once: 2x weight  
+ * - Played 2+ times: 1x weight
  */
 export const getNextGameForCycle = (data) => {
     const { playedGames = [], streak = 0 } = data;
     const today = getTodayDate();
 
-    // Filter games not played in the last 30 days
-    const recentGames = playedGames
-        .filter(pg => daysBetween(pg.date, today) <= 30)
-        .map(pg => pg.gameId);
-
-    const availableGames = games.filter(game => !recentGames.includes(game.id));
-
-    // If all games were played recently, allow any game
-    const pool = availableGames.length > 0 ? availableGames : games;
+    // Count how many times each game was played
+    const playCount = {};
+    playedGames.forEach(pg => {
+        playCount[pg.gameId] = (playCount[pg.gameId] || 0) + 1;
+    });
 
     // Determine difficulty tier based on streak
     // 0-9: easy, 10-29: medium, 30+: mix of all
@@ -191,21 +196,41 @@ export const getNextGameForCycle = (data) => {
     } else if (streak < 30) {
         preferredDifficulty = 'medium';
     } else {
-        // Mix of all difficulties
         preferredDifficulty = null;
     }
 
     // Filter by preferred difficulty if set
-    let filteredPool = pool;
+    let filteredPool = games;
     if (preferredDifficulty) {
-        const difficultyGames = pool.filter(g => g.difficulty === preferredDifficulty);
+        const difficultyGames = games.filter(g => g.difficulty === preferredDifficulty);
         if (difficultyGames.length > 0) {
             filteredPool = difficultyGames;
         }
     }
 
-    // Select random game from filtered pool
-    return filteredPool[Math.floor(Math.random() * filteredPool.length)];
+    // Build weighted pool
+    // Games never played: add 3 times
+    // Games played once: add 2 times
+    // Games played 2+ times: add 1 time
+    const weightedPool = [];
+    filteredPool.forEach(game => {
+        const count = playCount[game.id] || 0;
+        let weight;
+        if (count === 0) {
+            weight = 3; // Never played - highest chance
+        } else if (count === 1) {
+            weight = 2; // Played once
+        } else {
+            weight = 1; // Played multiple times
+        }
+
+        for (let i = 0; i < weight; i++) {
+            weightedPool.push(game);
+        }
+    });
+
+    // Select random from weighted pool
+    return weightedPool[Math.floor(Math.random() * weightedPool.length)];
 };
 
 /**

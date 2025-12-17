@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { FlowerIcon, CameraIcon, SparkleIcon } from './icons/Icons';
 import Card from './ui/Card';
+import PhotoModal from './PhotoModal';
+import MoodReaction from './MoodReaction';
+import PhotoFrameEffects from './PhotoFrameEffects';
 
 const EmotionalArea = ({ photo, message }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
     const [textRevealed, setTextRevealed] = useState(false);
+    const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
     const messageRef = useRef(null);
 
     useEffect(() => {
@@ -45,8 +49,11 @@ const EmotionalArea = ({ photo, message }) => {
                 variant="glass"
                 hover
             >
-                {/* Image Banner with Ken Burns */}
-                <div className="relative h-72 sm:h-80 w-full overflow-hidden">
+                {/* Image Banner with Ken Burns - Clickable */}
+                <div
+                    className="relative h-72 sm:h-80 w-full overflow-hidden cursor-pointer"
+                    onClick={() => setIsPhotoModalOpen(true)}
+                >
                     {/* Placeholder shimmer while loading */}
                     {!imageLoaded && (
                         <div className="absolute inset-0 bg-gradient-to-br from-pastel-pink/30 to-pastel-lavender/30 animate-pulse" />
@@ -69,6 +76,13 @@ const EmotionalArea = ({ photo, message }) => {
 
                     {/* Animated border ring */}
                     <div className="absolute inset-0 border-4 border-white/20 rounded-t-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    {/* Click hint - appears on hover */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full text-white text-sm font-medium">
+                            🔍 Klicken für Vollbild
+                        </div>
+                    </div>
 
                     {/* Photo Label with glass effect */}
                     <div className={`
@@ -93,6 +107,9 @@ const EmotionalArea = ({ photo, message }) => {
                     <div className="absolute top-8 right-8 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-200">
                         <SparkleIcon className="w-4 h-4" />
                     </div>
+
+                    {/* Photo Frame Effects - Animated decorations */}
+                    <PhotoFrameEffects isActive={imageLoaded} />
                 </div>
 
                 {/* Content Section */}
@@ -110,7 +127,7 @@ const EmotionalArea = ({ photo, message }) => {
                         </div>
                     </div>
 
-                    {/* Message with word-by-word reveal */}
+                    {/* Message with optimized reveal animation */}
                     <div
                         ref={messageRef}
                         className={`relative transition-all duration-500 ${isExpanded ? 'mb-4' : ''}`}
@@ -120,23 +137,25 @@ const EmotionalArea = ({ photo, message }) => {
                             onClick={() => isLongText && setIsExpanded(!isExpanded)}
                         >
                             "
-                            {words.map((word, index) => (
+                            {words.slice(0, 30).map((word, index) => (
                                 <span
                                     key={index}
                                     style={{
-                                        animationDelay: `${index * 50}ms`,
-                                        display: 'inline-block'
+                                        transitionDelay: textRevealed ? `${Math.min(index * 30, 300)}ms` : '0ms',
                                     }}
                                     className={`
-                                        transition-all duration-300
-                                        ${textRevealed
-                                            ? 'opacity-100 translate-y-0 blur-0'
-                                            : 'opacity-0 translate-y-2 blur-sm'}
+                                        inline-block transition-opacity duration-300
+                                        ${textRevealed ? 'opacity-100' : 'opacity-0'}
                                     `}
                                 >
                                     {word}{index < words.length - 1 ? '\u00A0' : ''}
                                 </span>
                             ))}
+                            {words.length > 30 && (
+                                <span className={`transition-opacity duration-300 ${textRevealed ? 'opacity-100' : 'opacity-0'}`}>
+                                    {words.slice(30).join(' ')}
+                                </span>
+                            )}
                             "
                         </p>
 
@@ -159,8 +178,18 @@ const EmotionalArea = ({ photo, message }) => {
                             </button>
                         )}
                     </div>
+
+                    {/* Mood Reaction - Emoji response to message */}
+                    <MoodReaction />
                 </div>
             </Card>
+
+            {/* Photo Modal for fullscreen view */}
+            <PhotoModal
+                photo={photo}
+                isOpen={isPhotoModalOpen}
+                onClose={() => setIsPhotoModalOpen(false)}
+            />
         </div>
     );
 };

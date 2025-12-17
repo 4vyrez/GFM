@@ -89,10 +89,16 @@ const AdminPanel = ({ onClose, onTestGame, currentAppData }) => {
                                     {currentAppData.playedGames?.length || 0}
                                 </span>
                             </div>
-                            <div className="flex justify-between items-center py-2">
+                            <div className="flex justify-between items-center py-2 border-b border-gray-200">
                                 <span className="text-gray-600 font-medium">Nächstes Game:</span>
                                 <span className="text-sm font-semibold text-gray-800">
                                     {currentAppData.nextAvailableDate || 'Heute'}
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center py-2">
+                                <span className="text-gray-600 font-medium">Verfügbare Games:</span>
+                                <span className="text-lg font-semibold text-indigo-600">
+                                    🎮 {games.length}
                                 </span>
                             </div>
                         </div>
@@ -194,6 +200,63 @@ const AdminPanel = ({ onClose, onTestGame, currentAppData }) => {
                                 className="w-full px-6 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-all"
                             >
                                 ⚠️ App komplett zurücksetzen
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Quick Access - Meme & Insider Games */}
+                    <div className="bg-white rounded-2xl shadow-lg p-6 lg:col-span-2">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            🎭 Quick Access - Meme & Insider Games
+                        </h2>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <button
+                                onClick={() => onTestGame('language-chaos-1')}
+                                className="px-4 py-3 bg-indigo-100 text-indigo-700 font-medium rounded-xl hover:bg-indigo-200 transition-all"
+                            >
+                                🎮 Language Chaos
+                            </button>
+                            <button
+                                onClick={() => onTestGame('captcha-cats-1')}
+                                className="px-4 py-3 bg-blue-100 text-blue-700 font-medium rounded-xl hover:bg-blue-200 transition-all"
+                            >
+                                🐱 Captcha Cats
+                            </button>
+                            <button
+                                onClick={() => onTestGame('megalodon-quiz-1')}
+                                className="px-4 py-3 bg-cyan-100 text-cyan-700 font-medium rounded-xl hover:bg-cyan-200 transition-all"
+                            >
+                                🦈 Megalodon Quiz
+                            </button>
+                            <button
+                                onClick={() => onTestGame('bite-meter-1')}
+                                className="px-4 py-3 bg-pink-100 text-pink-700 font-medium rounded-xl hover:bg-pink-200 transition-all"
+                            >
+                                🦷 Biss-Meter
+                            </button>
+                            <button
+                                onClick={() => onTestGame('fake-update-1')}
+                                className="px-4 py-3 bg-purple-100 text-purple-700 font-medium rounded-xl hover:bg-purple-200 transition-all"
+                            >
+                                💕 Love Update
+                            </button>
+                            <button
+                                onClick={() => onTestGame('meme-quiz-1')}
+                                className="px-4 py-3 bg-green-100 text-green-700 font-medium rounded-xl hover:bg-green-200 transition-all"
+                            >
+                                🎮 Meme Quiz
+                            </button>
+                            <button
+                                onClick={() => onTestGame('button-chase-1')}
+                                className="px-4 py-3 bg-orange-100 text-orange-700 font-medium rounded-xl hover:bg-orange-200 transition-all"
+                            >
+                                😈 Button Chase
+                            </button>
+                            <button
+                                onClick={() => onTestGame('streak-guardian-1')}
+                                className="px-4 py-3 bg-red-100 text-red-700 font-medium rounded-xl hover:bg-red-200 transition-all"
+                            >
+                                🔥 Streak Guardian
                             </button>
                         </div>
                     </div>

@@ -63,54 +63,57 @@ const StreakDisplay = ({ streak, streakFreezes = 0, lastUpdate, nextAvailableDat
             ${isCompact ? 'mb-4 p-4' : 'mb-8 p-6'}
             ${isUpdatedToday ? 'shadow-glow-orange' : 'shadow-glass'}
         `}>
-            {/* Animated background glow when active */}
+            {/* Subtle background accent when active */}
             {isUpdatedToday && (
-                <div className="absolute inset-0 -z-10 overflow-hidden">
-                    <div className="absolute -inset-4 bg-gradient-to-br from-orange-200/30 via-yellow-100/20 to-orange-100/30 animate-pulse-glow blur-xl" />
+                <div className="absolute inset-0 -z-10 overflow-hidden rounded-3xl">
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-100/40 via-yellow-50/30 to-orange-50/40" />
                 </div>
             )}
 
-            {/* Info Button - Top Right */}
-            <InfoButton className="absolute top-3 right-3 z-30">
-                <div className="flex items-center gap-2 mb-2">
-                    <StreakFreezeIcon className="w-4 h-4" />
-                    <span className="font-bold text-gray-800">Streak Freeze</span>
-                </div>
-                <p className="leading-relaxed text-gray-500">
-                    Sammle bis zu 3 Kristalle. Ein Kristall friert deinen Streak ein, wenn du mal einen Tag verpasst.
-                </p>
-            </InfoButton>
-
-            {/* Streak Freezes - Top Left with stagger animation */}
+            {/* Top Row: Streak Freezes + Info Button (LEFT SIDE) */}
             <div className={`
-                absolute left-4 flex items-center gap-1.5 transition-all duration-500
+                absolute left-4 flex items-center gap-2 transition-all duration-500
                 ${isCompact ? 'top-3' : 'top-4'}
             `}>
-                {[...Array(3)].map((_, i) => (
-                    <div
-                        key={i}
-                        style={{ animationDelay: `${i * 100}ms` }}
-                        className={`
-                            transition-all duration-300 transform
-                            ${i < streakFreezes ? 'animate-bounce-in opacity-100 scale-100' : 'opacity-30 scale-90'}
-                        `}
-                    >
-                        <StreakFreezeIcon
+                {/* Streak Freeze Crystals */}
+                <div className="flex items-center gap-1">
+                    {[...Array(3)].map((_, i) => (
+                        <div
+                            key={i}
+                            style={{ animationDelay: `${i * 100}ms` }}
                             className={`
-                                transition-all duration-300
-                                ${isCompact ? 'w-5 h-5' : 'w-7 h-7'}
+                                transition-all duration-300 transform
+                                ${i < streakFreezes ? 'animate-bounce-in opacity-100 scale-100' : 'opacity-30 scale-90'}
                             `}
-                            used={i >= streakFreezes}
-                        />
+                        >
+                            <StreakFreezeIcon
+                                className={`
+                                    transition-all duration-300
+                                    ${isCompact ? 'w-5 h-5' : 'w-6 h-6'}
+                                `}
+                                used={i >= streakFreezes}
+                            />
+                        </div>
+                    ))}
+                </div>
+
+                {/* Info Button - RIGHT NEXT TO CRYSTALS */}
+                <InfoButton className="z-50" compact={isCompact} position="left">
+                    <div className="flex items-center gap-2 mb-2">
+                        <StreakFreezeIcon className="w-4 h-4" />
+                        <span className="font-bold text-gray-800">Streak Freeze</span>
                     </div>
-                ))}
+                    <p className="leading-relaxed text-gray-500">
+                        Sammle bis zu 3 Kristalle. Ein Kristall friert deinen Streak ein, wenn du mal einen Tag verpasst.
+                    </p>
+                </InfoButton>
             </div>
 
             {/* Main Content with animated layout */}
             <div className={`
                 flex items-center
                 transition-all duration-500 ease-apple
-                ${isCompact ? 'flex-row gap-4 pt-0' : 'flex-col pt-10'}
+                ${isCompact ? 'flex-row gap-4 pt-8' : 'flex-col pt-10'}
             `}>
                 {/* Flame Icon Container with glow */}
                 <div className={`
@@ -118,15 +121,17 @@ const StreakDisplay = ({ streak, streakFreezes = 0, lastUpdate, nextAvailableDat
                     transition-all duration-500 ease-apple flex-shrink-0
                     ${isCompact ? 'w-14 h-14' : 'w-36 h-36 mb-2'}
                 `}>
-                    {/* Ambient glow behind flame */}
+                    {/* Subtle radial glow behind flame */}
                     {isUpdatedToday && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <div className={`
-                                rounded-full bg-gradient-to-br from-orange-400/40 to-yellow-300/30
-                                animate-pulse-glow blur-lg
-                                ${isCompact ? 'w-12 h-12' : 'w-28 h-28'}
-                            `} />
-                        </div>
+                        <div
+                            className={`
+                                absolute inset-0 rounded-full
+                                ${isCompact ? 'scale-[1.2]' : 'scale-[1.15]'}
+                            `}
+                            style={{
+                                background: 'radial-gradient(circle, rgba(251,146,60,0.25) 0%, rgba(253,186,116,0.1) 50%, transparent 70%)'
+                            }}
+                        />
                     )}
 
                     <FlameIcon
