@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { FlowerIcon, CameraIcon, SparkleIcon } from './icons/Icons';
 import Card from './ui/Card';
 import PhotoModal from './PhotoModal';
-import MoodReaction from './MoodReaction';
 import PhotoFrameEffects from './PhotoFrameEffects';
 
 const EmotionalArea = ({ photo, message }) => {
@@ -178,9 +177,6 @@ const EmotionalArea = ({ photo, message }) => {
                             </button>
                         )}
                     </div>
-
-                    {/* Mood Reaction - Emoji response to message */}
-                    <MoodReaction />
                 </div>
             </Card>
 

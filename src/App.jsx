@@ -47,7 +47,6 @@ import TapRhythm from './components/games/TapRhythm';
 import MirrorMatch from './components/games/MirrorMatch';
 import LoveMeter from './components/games/LoveMeter';
 // UX Enhancement Features
-import DailyAffirmation from './components/DailyAffirmation';
 import TapHearts from './components/TapHearts';
 import CountdownWidget from './components/CountdownWidget';
 import AmbientConfetti from './components/AmbientConfetti';
@@ -399,9 +398,6 @@ function App() {
         {/* Tap Hearts - Interactive heart spawner (lightweight, keep everywhere) */}
         <TapHearts />
 
-        {/* Daily Affirmation - Floating sweet message */}
-        <DailyAffirmation delay={8000} />
-
         {/* Theme-Specific HUD Overlay - Creative elements per theme */}
         <ThemeOverlay />
 
@@ -581,7 +577,7 @@ function App() {
                   {/* Christmas Countdown Widget */}
                   <div className="max-w-md mx-auto">
                     <CountdownWidget
-                      targetDate="2025-12-25"
+                      targetDate="2026-12-25"
                       label="Bis Weihnachten"
                     />
                   </div>

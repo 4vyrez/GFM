@@ -1,6 +1,7 @@
 // Photo pool - dynamically generated from public/photos folder
 // Each photo shows every 3 days = need 122 photos for a full year (365/3)
-// Currently have 89 photos - need 33 more for complete year coverage
+// Currently have 89 photos - ADD 33 MORE PHOTOS TO public/photos/ FOR COMPLETE YEAR COVERAGE
+// Just add the filenames to the photoFilenames array below
 
 const photoFilenames = [
     '067A99D2-FCF7-4389-B225-F0416FD8F832_1_105_c.jpeg',
@@ -97,6 +98,8 @@ export const photos = photoFilenames.map((filename, index) => ({
 }));
 
 // Loving messages, compliments, and insider jokes
+// Need 122 messages for full year coverage (365/3 = 122)
+// Currently have 16 messages - ADD 106 MORE MESSAGES BELOW FOR COMPLETE YEAR COVERAGE
 export const messages = [
     { id: 1, text: 'Du bist das Schönste in meinem Leben ❤️' },
     { id: 2, text: 'Dein Lächeln macht mich so glücklich und du steckst mich immer wieder damit an' },

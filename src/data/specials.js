@@ -1,9 +1,17 @@
 /**
  * Monthly Specials Configuration
  * Special events and rewards that appear throughout the year
+ * 
+ * STREAK MILESTONES:
+ * - 7 days: Erster Woche geschafft!
+ * - 14 days: Zwei Wochen durchgehalten!
+ * - 30 days: Ein ganzer Monat!
+ * - 50 days: Mega-Streak!
+ * - 100 days: Legendärer Streak!
  */
 
 export const specials = [
+    // === PERSISTENT SPECIALS ===
     {
         id: "growing-flower",
         name: "Wachsende Blume",
@@ -20,20 +28,100 @@ export const specials = [
             { name: "Volle Blüte", emoji: "🌺", visitsRequired: 50 },
         ],
     },
+
+    // === STREAK MILESTONE SPECIALS ===
     {
-        id: "date-ticket-30",
-        name: "Date Ticket",
-        type: "unlock", // One-time unlock
-        description: "Ein besonderes Date erwartet dich!",
-        triggerType: "streak", // Triggered by streak milestone
+        id: "milestone-7",
+        name: "Erste Woche!",
+        type: "milestone",
+        description: "Du hast eine ganze Woche durchgehalten! 💪",
+        triggerType: "streak",
+        triggerValue: 7,
+        icon: "🌟",
+        reward: {
+            title: "7-Tage Champion",
+            message: "Eine Woche lang jeden dritten Tag da gewesen - das zeigt echte Liebe! 💕",
+            emoji: "⭐",
+            animation: "sparkle",
+        },
+    },
+    {
+        id: "milestone-14",
+        name: "Zwei Wochen!",
+        type: "milestone",
+        description: "Zwei Wochen Streak - unglaublich!",
+        triggerType: "streak",
+        triggerValue: 14,
+        icon: "💎",
+        reward: {
+            title: "2-Wochen Diamant",
+            message: "Zwei Wochen lang an mich gedacht - du bist der Beste! 💎",
+            emoji: "💎",
+            animation: "shine",
+        },
+    },
+    {
+        id: "milestone-30",
+        name: "Ein Monat!",
+        type: "milestone",
+        description: "Ein ganzer Monat Streak!",
+        triggerType: "streak",
         triggerValue: 30,
         icon: "🎟️",
+        reward: {
+            title: "Date Ticket",
+            message: "Du hast dir ein besonderes Date verdient!",
+            emoji: "🎟️",
+            animation: "confetti",
+        },
         dateIdea: {
             title: "Romantischer Abend",
             description: "Ein gemütlicher Abend zu zweit mit Kerzen, gutem Essen und deiner Lieblingsmusik 🕯️❤️",
             emoji: "🌹",
         },
     },
+    {
+        id: "milestone-50",
+        name: "50 Tage!",
+        type: "milestone",
+        description: "50 Tage Streak - Mega!",
+        triggerType: "streak",
+        triggerValue: 50,
+        icon: "🏆",
+        reward: {
+            title: "Goldpokal",
+            message: "50 Tage! Du bist unschlagbar! Hier ist dein Gold-Award! 🏆",
+            emoji: "�",
+            animation: "trophy",
+        },
+        dateIdea: {
+            title: "Überraschungs-Ausflug",
+            description: "Ein spontaner Ausflug zu einem Ort, den du schon immer besuchen wolltest 🗺️✨",
+            emoji: "🚗",
+        },
+    },
+    {
+        id: "milestone-100",
+        name: "100 Tage!",
+        type: "milestone",
+        description: "LEGENDÄR! 100 Tage Streak!",
+        triggerType: "streak",
+        triggerValue: 100,
+        icon: "👑",
+        reward: {
+            title: "Legendärer Status",
+            message: "100 TAGE! Du bist eine lebende Legende der Liebe! 👑✨",
+            emoji: "👑",
+            animation: "legendary",
+        },
+        dateIdea: {
+            title: "Großes Abenteuer",
+            description: "Ein unvergessliches Abenteuer - du hast es dir mehr als verdient! 🌍💫",
+            emoji: "🎢",
+        },
+    },
+
+    // === DATE TICKET SPECIALS (Additional) ===
     {
         id: "date-ticket-60",
         name: "Date Ticket",
@@ -43,9 +131,9 @@ export const specials = [
         triggerValue: 60,
         icon: "🎟️",
         dateIdea: {
-            title: "Überraschungs-Ausflug",
-            description: "Ein spontaner Ausflug zu einem Ort, den du schon immer besuchen wolltest 🗺️✨",
-            emoji: "🚗",
+            title: "Picknick unter Sternen",
+            description: "Ein romantisches Picknick unter dem Sternenhimmel, nur wir zwei 🌌🧺",
+            emoji: "⭐",
         },
     },
     {
@@ -57,9 +145,9 @@ export const specials = [
         triggerValue: 90,
         icon: "🎟️",
         dateIdea: {
-            title: "Picknick unter Sternen",
-            description: "Ein romantisches Picknick unter dem Sternenhimmel, nur wir zwei 🌌🧺",
-            emoji: "⭐",
+            title: "Wellness Tag",
+            description: "Ein entspannender Tag nur für uns - Massage, Spa, und Quality Time 💆‍♀️💆‍♂️",
+            emoji: "🧖",
         },
     },
 ];
