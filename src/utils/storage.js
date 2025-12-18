@@ -320,6 +320,8 @@ export const adminForceNextCycle = () => {
         ...data,
         nextAvailableDate: getTodayDate(), // Available now
         lastStreakUpdateDate: yesterday.toISOString().split('T')[0], // Allow update
+        currentGameId: null, // Clear current game to force refresh
+        dailyContent: { ...defaultData.dailyContent } // Clear daily content to force refresh
     };
     saveData(updatedData);
     window.location.reload();

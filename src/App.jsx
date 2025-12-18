@@ -196,8 +196,7 @@ function App() {
     // Use cycleStartDate to track which cycle the content belongs to
     const cycleIsDue = isContentRefreshDue(data);
     const currentCycleStart = data.nextAvailableDate || today;
-    const contentMatchesCurrentCycle = data.dailyContent?.cycleStartDate === currentCycleStart ||
-      (data.dailyContent?.minigameId && data.dailyContent.minigameId === data.currentGameId);
+    const contentMatchesCurrentCycle = data.dailyContent?.cycleStartDate === currentCycleStart;
     const shouldPickNewContent = cycleIsDue && !contentMatchesCurrentCycle;
 
     if (shouldPickNewContent) {
