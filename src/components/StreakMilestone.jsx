@@ -62,42 +62,53 @@ const milestones = [
     },
 ];
 
-// Growing Plant Animation Component for 30-day milestone
-const PlantAnimation = () => {
+// Treasure Chest Opening Animation for 30-day milestone
+const TreasureAnimation = () => {
     const [stage, setStage] = useState(0);
-    const stages = ['🌱', '🌿', '🪴', '🌸', '🌺'];
+    // Stages: 0 = chest closed, 1 = shaking, 2 = opening, 3 = golden glow, 4 = sparkles
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setStage(prev => {
-                if (prev < stages.length - 1) return prev + 1;
-                clearInterval(interval);
-                return prev;
-            });
-        }, 400);
-        return () => clearInterval(interval);
+        const timers = [
+            setTimeout(() => setStage(1), 300),   // Start shaking
+            setTimeout(() => setStage(2), 1000),  // Open
+            setTimeout(() => setStage(3), 1500),  // Golden glow
+            setTimeout(() => setStage(4), 2000),  // Sparkles burst
+        ];
+        return () => timers.forEach(clearTimeout);
     }, []);
 
     return (
-        <div className="relative">
+        <div className="relative flex items-center justify-center">
+            {/* Golden glow behind */}
             <div
-                className="text-8xl transition-all duration-500 ease-spring"
-                style={{ transform: `scale(${1 + stage * 0.15})` }}
+                className={`absolute w-40 h-40 rounded-full transition-all duration-700 ${stage >= 3 ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+                    }`}
+                style={{
+                    background: 'radial-gradient(circle, rgba(255,215,0,0.6) 0%, rgba(255,165,0,0.3) 50%, transparent 70%)',
+                }}
+            />
+
+            {/* Chest emoji with animations */}
+            <div
+                className={`text-8xl transition-all duration-300 ${stage === 1 ? 'animate-shake' : ''
+                    } ${stage >= 2 ? 'scale-110' : 'scale-100'}`}
             >
-                {stages[stage]}
+                {stage < 2 ? '🎁' : '💝'}
             </div>
-            {/* Growing sparkles */}
-            {[...Array(8)].map((_, i) => (
-                <SparkleIcon
+
+            {/* Sparkle burst */}
+            {stage >= 4 && [...Array(12)].map((_, i) => (
+                <div
                     key={i}
-                    className="absolute w-6 h-6 text-green-300 animate-pulse"
+                    className="absolute text-2xl animate-ping"
                     style={{
-                        top: `${20 + Math.sin(i * 0.8) * 30}%`,
-                        left: `${50 + Math.cos(i * 0.8) * 40}%`,
-                        animationDelay: `${i * 0.1}s`,
-                        opacity: stage >= 2 ? 1 : 0,
+                        transform: `rotate(${i * 30}deg) translateY(-60px)`,
+                        animationDelay: `${i * 0.05}s`,
+                        animationDuration: '1s',
                     }}
-                />
+                >
+                    ✨
+                </div>
             ))}
         </div>
     );
@@ -270,7 +281,7 @@ const StreakMilestone = ({ streak, isVisible, onClose }) => {
                 {/* Special Animation or Emoji */}
                 <div className="mb-4">
                     {is30Day ? (
-                        <PlantAnimation />
+                        <TreasureAnimation />
                     ) : is100Day ? (
                         null // Crown is in FireworksAnimation
                     ) : (

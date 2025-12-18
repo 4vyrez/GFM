@@ -179,10 +179,13 @@ function App() {
 
     const today = getTodayDate();
 
-    // Fix bug: Only refresh content if starting a NEW cycle, not on every page reload
-    // Content should persist within the same cycle day
-    const hasValidDailyContent = data.dailyContent?.date === today;
-    const shouldPickNewContent = !hasValidDailyContent && isContentRefreshDue(data);
+    // Content refresh logic:
+    // Pick new content IF: cycle is due AND (no daily content OR daily content was for a different available date)
+    // This ensures: reload same day = same content, new cycle = new content
+    const cycleIsDue = isContentRefreshDue(data);
+    const contentMatchesCurrentCycle = data.dailyContent?.date &&
+      data.dailyContent.date >= (data.lastStreakUpdateDate || '1970-01-01');
+    const shouldPickNewContent = cycleIsDue && !contentMatchesCurrentCycle;
 
     if (shouldPickNewContent) {
       const isSpecialMoment = data.streak === 17;
