@@ -25,6 +25,9 @@ const defaultData = {
     shownPhotoIds: [], // Track shown photos to prevent repeats
     shownMessageIds: [], // Track shown messages to prevent repeats
     moodReactions: {}, // Track mood reactions by date: { '2025-12-15': '❤️' }
+    // Inventory system
+    collectedBadges: [], // Badge IDs earned: ['milestone-7', 'milestone-14', ...]
+    collectedTickets: [], // Ticket objects: [{ id, name, icon, description, used: false }]
     dailyContent: {
         date: null,
         photoId: null,

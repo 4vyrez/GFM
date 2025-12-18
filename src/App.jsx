@@ -9,6 +9,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import BackgroundParticles from './components/BackgroundParticles';
 import StreakMilestone from './components/StreakMilestone';
 import StatsPanel from './components/StatsPanel';
+import Inventory from './components/Inventory';
 import TicTacToe from './components/games/TicTacToe';
 import ReactionRace from './components/games/ReactionRace';
 import FindTheHeart from './components/games/FindTheHeart';
@@ -146,6 +147,7 @@ function App() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showMilestone, setShowMilestone] = useState(false);
   const [milestoneStreak, setMilestoneStreak] = useState(0);
+  const [showInventory, setShowInventory] = useState(false);
 
   // Time-based greeting
   const greeting = useMemo(() => getGreeting(), []);
@@ -177,7 +179,12 @@ function App() {
 
     const today = getTodayDate();
 
-    if (isContentRefreshDue(data)) {
+    // Fix bug: Only refresh content if starting a NEW cycle, not on every page reload
+    // Content should persist within the same cycle day
+    const hasValidDailyContent = data.dailyContent?.date === today;
+    const shouldPickNewContent = !hasValidDailyContent && isContentRefreshDue(data);
+
+    if (shouldPickNewContent) {
       const isSpecialMoment = data.streak === 17;
       // Use non-repeating selection for photos and messages
       const shownPhotoIds = data.shownPhotoIds || [];
@@ -292,6 +299,18 @@ function App() {
     }
   };
 
+  const handleUseTicket = (ticketId) => {
+    const data = getData();
+    const updatedTickets = data.collectedTickets.map(t =>
+      t.id === ticketId ? { ...t, used: true } : t
+    );
+    saveData({ ...data, collectedTickets: updatedTickets });
+    setAppData(prev => ({
+      ...prev,
+      collectedTickets: updatedTickets
+    }));
+  };
+
   if (!appData || !dailyPhoto || !dailyMessage || !currentGameConfig) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -398,6 +417,22 @@ function App() {
         {/* Tap Hearts - Interactive heart spawner (lightweight, keep everywhere) */}
         <TapHearts />
 
+        {/* Floating Inventory Button - Top Right */}
+        <button
+          onClick={() => setShowInventory(true)}
+          className="fixed top-4 right-4 z-40 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-white/50 flex items-center justify-center text-2xl hover:scale-110 transition-transform"
+          title="Inventar öffnen"
+        >
+          🎒
+          {/* Badge count indicator */}
+          {(appData.collectedBadges?.length > 0 || appData.collectedTickets?.filter(t => !t.used).length > 0) && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-pink-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+              {(appData.collectedBadges?.length || 0) + (appData.collectedTickets?.filter(t => !t.used).length || 0)}
+            </span>
+          )}
+        </button>
+
+
         {/* Theme-Specific HUD Overlay - Creative elements per theme */}
         <ThemeOverlay />
 
@@ -406,6 +441,15 @@ function App() {
           streak={milestoneStreak}
           isVisible={showMilestone}
           onClose={() => setShowMilestone(false)}
+        />
+
+        {/* Inventory Drawer */}
+        <Inventory
+          isOpen={showInventory}
+          onClose={() => setShowInventory(false)}
+          badges={appData.collectedBadges || []}
+          tickets={appData.collectedTickets || []}
+          onUseTicket={handleUseTicket}
         />
 
         {/* Premium Success Overlay - Duolingo Style Celebration */}

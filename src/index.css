@@ -455,3 +455,30 @@
 .animate-particle-float {
   animation: particle-float linear infinite;
 }
+
+/* Firework Animation for 100-day milestone */
+@keyframes firework {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  20% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.5);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.animate-firework {
+  animation: firework 1.5s ease-out infinite;
+}
