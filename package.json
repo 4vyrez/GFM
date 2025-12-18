@@ -10,8 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/client": "5.10.2",
     "cookie": "^0.7.1",
+    "prisma": "5.10.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
