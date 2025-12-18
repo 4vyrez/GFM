@@ -30,6 +30,7 @@ const defaultData = {
     collectedTickets: [], // Ticket objects: [{ id, name, icon, description, used: false }]
     dailyContent: {
         date: null,
+        cycleStartDate: null, // Track which cycle this content belongs to
         photoId: null,
         messageId: null,
         minigameId: null,

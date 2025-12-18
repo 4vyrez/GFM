@@ -52,6 +52,7 @@ import TapHearts from './components/TapHearts';
 import CountdownWidget from './components/CountdownWidget';
 import AmbientConfetti from './components/AmbientConfetti';
 import ThemeOverlay from './components/ThemeOverlay';
+import LoginScreen from './components/LoginScreen';
 import { photos, messages, getRandomItem, getNextPhoto, getNextMessage } from './data/content';
 import { getGameById, games } from './data/games';
 import { SparkleIcon, FlameIcon, ConfettiIcon } from './components/icons/Icons';
@@ -137,6 +138,11 @@ const Countdown = ({ targetDate }) => {
 };
 
 function App() {
+  // Authentication state - checks localStorage for saved auth
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('gfm_auth_code') !== null;
+  });
+
   const [appData, setAppData] = useState(null);
   const [dailyPhoto, setDailyPhoto] = useState(null);
   const [dailyMessage, setDailyMessage] = useState(null);
@@ -148,6 +154,12 @@ function App() {
   const [showMilestone, setShowMilestone] = useState(false);
   const [milestoneStreak, setMilestoneStreak] = useState(0);
   const [showInventory, setShowInventory] = useState(false);
+
+  // Handle login
+  const handleLogin = (code) => {
+    localStorage.setItem('gfm_auth_code', code.toLowerCase().trim());
+    setIsAuthenticated(true);
+  };
 
   // Time-based greeting
   const greeting = useMemo(() => getGreeting(), []);
@@ -180,11 +192,12 @@ function App() {
     const today = getTodayDate();
 
     // Content refresh logic:
-    // Pick new content IF: cycle is due AND (no daily content OR daily content was for a different available date)
-    // This ensures: reload same day = same content, new cycle = new content
+    // Pick new content IF: cycle is due AND we don't have content for this cycle
+    // Use cycleStartDate to track which cycle the content belongs to
     const cycleIsDue = isContentRefreshDue(data);
-    const contentMatchesCurrentCycle = data.dailyContent?.date &&
-      data.dailyContent.date >= (data.lastStreakUpdateDate || '1970-01-01');
+    const currentCycleStart = data.nextAvailableDate || today;
+    const contentMatchesCurrentCycle = data.dailyContent?.cycleStartDate === currentCycleStart ||
+      (data.dailyContent?.minigameId && data.dailyContent.minigameId === data.currentGameId);
     const shouldPickNewContent = cycleIsDue && !contentMatchesCurrentCycle;
 
     if (shouldPickNewContent) {
@@ -222,6 +235,7 @@ function App() {
         shownMessageIds: newShownMessageIds,
         dailyContent: {
           date: today,
+          cycleStartDate: data.nextAvailableDate || today, // Track which cycle this content belongs to
           photoId: photo.id,
           messageId: message.id,
           minigameId: selectedGame.id,
@@ -313,6 +327,11 @@ function App() {
       collectedTickets: updatedTickets
     }));
   };
+
+  // Show login screen if not authenticated
+  if (!isAuthenticated) {
+    return <LoginScreen onLogin={handleLogin} />;
+  }
 
   if (!appData || !dailyPhoto || !dailyMessage || !currentGameConfig) {
     return (

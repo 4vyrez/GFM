@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FlowerIcon, CameraIcon, SparkleIcon } from './icons/Icons';
+import { CameraIcon, SparkleIcon } from './icons/Icons';
 import Card from './ui/Card';
 import PhotoModal from './PhotoModal';
 import PhotoFrameEffects from './PhotoFrameEffects';
@@ -113,17 +113,15 @@ const EmotionalArea = ({ photo, message }) => {
 
                 {/* Content Section */}
                 <div className="p-8 sm:p-10 text-center bg-gradient-to-b from-white/80 to-white/95">
-                    {/* Decorative flower */}
+                    {/* Decorative sparkles - replaced flower animation */}
                     <div className={`
-                        mb-6 flex justify-center
+                        mb-6 flex justify-center items-center gap-2
                         transition-all duration-700 delay-300
                         ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}
                     `}>
-                        <div className="relative">
-                            <FlowerIcon className="w-12 h-12 animate-float-slow" />
-                            {/* Subtle glow */}
-                            <div className="absolute inset-0 bg-pastel-pink/30 rounded-full blur-lg -z-10" />
-                        </div>
+                        <SparkleIcon className="w-5 h-5 animate-float text-yellow-400" />
+                        <div className="text-3xl animate-heartbeat">💕</div>
+                        <SparkleIcon className="w-5 h-5 animate-float-slow text-pink-400" />
                     </div>
 
                     {/* Message with optimized reveal animation */}

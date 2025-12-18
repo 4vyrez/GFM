@@ -11,24 +11,6 @@
  */
 
 export const specials = [
-    // === PERSISTENT SPECIALS ===
-    {
-        id: "growing-flower",
-        name: "Wachsende Blume",
-        type: "persistent", // Grows over time
-        description: "Eine Blume wächst mit jedem Besuch",
-        triggerType: "always", // Always active
-        icon: "🌱",
-        stages: [
-            { name: "Samen", emoji: "🌱", visitsRequired: 0 },
-            { name: "Keim", emoji: "🌿", visitsRequired: 5 },
-            { name: "Stängel", emoji: "🪴", visitsRequired: 10 },
-            { name: "Knospe", emoji: "🥀", visitsRequired: 20 },
-            { name: "Blume", emoji: "🌸", visitsRequired: 30 },
-            { name: "Volle Blüte", emoji: "🌺", visitsRequired: 50 },
-        ],
-    },
-
     // === STREAK MILESTONE SPECIALS ===
     {
         id: "milestone-7",
@@ -55,7 +37,7 @@ export const specials = [
         icon: "💎",
         reward: {
             title: "2-Wochen Diamant",
-            message: "Zwei Wochen lang an mich gedacht - du bist der Beste! 💎",
+            message: "Zwei Wochen lang an mich gedacht - du bist die Beste! 💎",
             emoji: "💎",
             animation: "shine",
         },
@@ -76,7 +58,7 @@ export const specials = [
         },
         dateIdea: {
             title: "Romantischer Abend",
-            description: "Ein gemütlicher Abend zu zweit mit Kerzen, gutem Essen und deiner Lieblingsmusik 🕯️❤️",
+            description: "Ein gemütlicher Zeitpunkt für uns beide, für ein Date deiner Wahl ❤️",
             emoji: "🌹",
         },
     },
@@ -96,7 +78,7 @@ export const specials = [
         },
         dateIdea: {
             title: "Überraschungs-Ausflug",
-            description: "Ein spontaner Ausflug zu einem Ort, den du schon immer besuchen wolltest 🗺️✨",
+            description: "Ein spontaner Ausflug zum Turmberg, oder einen Ort den du schon immer besuchen wolltest mit mir? 🗺️✨",
             emoji: "🚗",
         },
     },
@@ -116,7 +98,7 @@ export const specials = [
         },
         dateIdea: {
             title: "Großes Abenteuer",
-            description: "Ein unvergessliches Abenteuer - du hast es dir mehr als verdient! 🌍💫",
+            description: "Ein unvergessliches Abenteuer deiner Wahl mit mir 🌍💫",
             emoji: "🎢",
         },
     },
@@ -131,8 +113,8 @@ export const specials = [
         triggerValue: 60,
         icon: "🎟️",
         dateIdea: {
-            title: "Picknick unter Sternen",
-            description: "Ein romantisches Picknick unter dem Sternenhimmel, nur wir zwei 🌌🧺",
+            title: "Date am Schloss",
+            description: "Ein romantisches Nachtdate am Schloss, nur wir zwei 🌌🧺",
             emoji: "⭐",
         },
     },
@@ -145,9 +127,9 @@ export const specials = [
         triggerValue: 90,
         icon: "🎟️",
         dateIdea: {
-            title: "Wellness Tag",
-            description: "Ein entspannender Tag nur für uns - Massage, Spa, und Quality Time 💆‍♀️💆‍♂️",
-            emoji: "🧖",
+            title: "Date am Turmberg",
+            description: "Ein entspannender Tag nur für uns am Turmberg 🏔️",
+            emoji: "🏔️",
         },
     },
 ];

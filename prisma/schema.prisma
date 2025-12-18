@@ -1,0 +1,83 @@
+// Prisma Schema for GFM App with Vercel Postgres
+// Run: npx prisma db push
+// Generate client: npx prisma generate
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL") // Uses Vercel's connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // Direct connection for migrations
+}
+
+// Simple auth - just a code that unlocks the app
+model AppAccess {
+  id          String   @id @default(cuid())
+  accessCode  String   @unique // The secret code to access the app
+  createdAt   DateTime @default(now())
+  lastAccess  DateTime?
+}
+
+// User state - persists across sessions/devices
+model UserState {
+  id                    String   @id @default(cuid())
+  accessCode            String   @unique // Links to AppAccess
+  streak                Int      @default(0)
+  longestStreak         Int      @default(0)
+  streakFreezes         Int      @default(0)
+  freezesUsed           Int      @default(0)
+  lastStreakUpdateDate  String?
+  nextAvailableDate     String?
+  totalVisits           Int      @default(0)
+  currentGameId         String?
+  
+  // Daily content tracking
+  dailyContentDate      String?
+  dailyContentCycleStart String?
+  dailyContentPhotoId   Int?
+  dailyContentMessageId Int?
+  dailyContentGameId    String?
+  dailyContentIsSpecial Boolean  @default(false)
+  
+  // Shown content tracking (to prevent repeats)
+  shownPhotoIds         Int[]    @default([])
+  shownMessageIds       Int[]    @default([])
+  
+  // Inventory
+  collectedBadges       String[] @default([])
+  collectedTickets      Json     @default("[]")
+  
+  // Mood tracking
+  moodReactions         Json     @default("{}")
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+// Game results for comparison feature
+model GameResult {
+  id         String   @id @default(cuid())
+  accessCode String
+  gameId     String
+  metric     String
+  value      Float
+  playedAt   DateTime @default(now())
+  
+  @@index([accessCode])
+  @@index([gameId])
+}
+
+// Played games history
+model PlayedGame {
+  id             String   @id @default(cuid())
+  accessCode     String
+  gameId         String
+  won            Boolean
+  attempts       Int      @default(1)
+  completionTime Int?     // in milliseconds
+  playedAt       DateTime @default(now())
+  
+  @@index([accessCode])
+}
