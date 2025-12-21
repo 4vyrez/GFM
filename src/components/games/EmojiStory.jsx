@@ -21,6 +21,16 @@ const EmojiStory = ({ onWin }) => {
             correctOrder: ['👫', '🍳', '☕', '❤️'],
             allEmojis: ['👫', '🍳', '☕', '❤️', '🌙', '⭐', '🎈', '🌸'],
         },
+        {
+            text: 'Wir kuscheln auf dem Sofa und schauen einen Film',
+            correctOrder: ['👫', '🛋️', '📺', '❤️'],
+            allEmojis: ['👫', '🛋️', '📺', '❤️', '🍿', '🎬', '😴', '🌙'],
+        },
+        {
+            text: 'Zusammen spielen wir Games und gewinnen als Team',
+            correctOrder: ['👫', '🎮', '🏆', '❤️'],
+            allEmojis: ['👫', '🎮', '🏆', '❤️', '💻', '⭐', '🎯', '🔥'],
+        },
     ];
 
     const [currentStory, setCurrentStory] = useState(null);

@@ -14,7 +14,7 @@ const MirrorMatch = ({ onWin }) => {
     const [moves, setMoves] = useState(0);
     const [isChecking, setIsChecking] = useState(false);
 
-    const emojiPairs = ['💕', '💖', '🌸', '✨', '🦋', '🌈'];
+    const emojiPairs = ['💕', '💖', '🌸', '✨', '🦋', '🌈', '🌺', '💫'];
 
     useEffect(() => {
         setTimeout(() => setIsVisible(true), 100);

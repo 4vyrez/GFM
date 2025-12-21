@@ -9,10 +9,10 @@ const SimonColors = ({ onWin, config = {} }) => {
     const { sequenceLength = 4 } = config;
 
     const colors = [
-        { id: 0, name: 'Rosa', bg: 'bg-pastel-pink', active: 'bg-pink-400', ring: 'ring-pink-300' },
-        { id: 1, name: 'Lila', bg: 'bg-pastel-lavender', active: 'bg-purple-400', ring: 'ring-purple-300' },
-        { id: 2, name: 'Mint', bg: 'bg-pastel-mint', active: 'bg-green-400', ring: 'ring-green-300' },
-        { id: 3, name: 'Blau', bg: 'bg-pastel-blue', active: 'bg-blue-400', ring: 'ring-blue-300' },
+        { id: 0, name: 'Rosa', bg: 'bg-gradient-to-br from-pink-300 to-pink-400', active: 'bg-pink-500', ring: 'ring-pink-300' },
+        { id: 1, name: 'Lila', bg: 'bg-gradient-to-br from-purple-300 to-purple-400', active: 'bg-purple-500', ring: 'ring-purple-300' },
+        { id: 2, name: 'Mint', bg: 'bg-gradient-to-br from-green-300 to-green-400', active: 'bg-green-500', ring: 'ring-green-300' },
+        { id: 3, name: 'Blau', bg: 'bg-gradient-to-br from-blue-300 to-blue-400', active: 'bg-blue-500', ring: 'ring-blue-300' },
     ];
 
     const [sequence, setSequence] = useState([]);

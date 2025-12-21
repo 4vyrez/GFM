@@ -41,7 +41,7 @@ export const games = [
         estimatedDuration: "60 Sek",
         component: "ColorMatch",
         tags: ["memory", "colors", "quick"],
-        dummyPartnerScore: { metric: "level", value: 5 },
+        dummyPartnerScore: { metric: "attempts", value: 1 },
     },
     {
         id: "number-guess-1",
@@ -76,7 +76,7 @@ export const games = [
         estimatedDuration: "2-3 Min",
         component: "MemoryCards",
         tags: ["memory", "classic", "matching"],
-        dummyPartnerScore: { metric: "flips", value: 24 },
+        dummyPartnerScore: { metric: "flips", value: 15 },
     },
 
     // === LONGER GAMES (3-5 minutes) ===
@@ -100,7 +100,7 @@ export const games = [
         estimatedDuration: "2-3 Min",
         component: "EmojiStory",
         tags: ["creative", "emoji", "story"],
-        dummyPartnerScore: { metric: "seconds", value: 19 },
+        dummyPartnerScore: { metric: "seconds", value: 29 },
     },
     {
         id: "quiz-1",
@@ -126,7 +126,7 @@ export const games = [
         estimatedDuration: "30 Sek",
         component: "ChargeBar",
         tags: ["reflex", "timing", "skill"],
-        dummyPartnerScore: { metric: "attempts", value: 1 },
+        dummyPartnerScore: { metric: "accuracy", value: 100 },
     },
     {
         id: "stop-the-bar-1",
@@ -214,19 +214,20 @@ export const games = [
         dummyPartnerScore: { metric: "attempts", value: 2 },
     },
     {
-        id: "path-finder-1",
-        type: "puzzle",
-        name: "Pfadfinder",
-        description: "Finde den Weg durch das Labyrinth!",
+        id: "ghost-download-1",
+        type: "meme",
+        name: "Ghost Download",
+        description: "Fang den Download-Button! ⚔️",
         difficulty: "easy",
-        estimatedDuration: "45 Sek",
-        component: "PathFinder",
-        tags: ["puzzle", "maze", "logic"],
-        dummyPartnerScore: { metric: "steps", value: 11 },
+        estimatedDuration: "30 Sek",
+        component: "GhostDownload",
+        tags: ["meme", "reflex", "fun", "auto-win"],
+        dummyPartnerScore: { metric: "attempts", value: 12 },
     },
 
     // ============================================
     // === NEW GAMES: WORD / INSIDER / QUIZ ===
+    // ============================================
     // ============================================
     {
         id: "love-code-1",
@@ -266,15 +267,15 @@ export const games = [
     // === NEW GAMES: EMOTIONAL / EASY ===
     // ============================================
     {
-        id: "bubble-pop-1",
-        type: "relaxing",
-        name: "Bubble Pop",
-        description: "Pop die Bubbles! Anti-Stress 🫧",
-        difficulty: "easy",
-        estimatedDuration: "30 Sek",
-        component: "BubblePop",
-        tags: ["relaxing", "cute", "easy"],
-        dummyPartnerScore: { metric: "bubbles", value: 5 },
+        id: "history-quiz-1",
+        type: "quiz",
+        name: "Geschichte Quiz",
+        description: "Wann war was? 📚",
+        difficulty: "medium",
+        estimatedDuration: "2 Min",
+        component: "HistoryQuiz",
+        tags: ["quiz", "history", "knowledge"],
+        dummyPartnerScore: { metric: "correct", value: 5 },
     },
     {
         id: "compliment-reveal-1",
@@ -296,7 +297,7 @@ export const games = [
         estimatedDuration: "20 Sek",
         component: "BiteMeter",
         tags: ["insider", "fun", "auto-win"],
-        dummyPartnerScore: { metric: "level", value: 75 },
+        dummyPartnerScore: { metric: "level", value: 10 },
     },
 
     // ============================================
@@ -318,17 +319,6 @@ export const games = [
     // === NEW GAMES: CREATIVE ADDITIONS ===
     // ============================================
     {
-        id: "emoji-scramble-1",
-        type: "puzzle",
-        name: "Emoji Scramble",
-        description: "Sortiere die Emojis richtig!",
-        difficulty: "easy",
-        estimatedDuration: "45 Sek",
-        component: "EmojiScramble",
-        tags: ["puzzle", "emoji", "word"],
-        dummyPartnerScore: { metric: "attempts", value: 2 },
-    },
-    {
         id: "lucky-spin-1",
         type: "luck",
         name: "Glücksrad",
@@ -338,17 +328,6 @@ export const games = [
         component: "LuckySpin",
         tags: ["luck", "fun", "prize"],
         dummyPartnerScore: { metric: "spins", value: 1 },
-    },
-    {
-        id: "tap-rhythm-1",
-        type: "rhythm",
-        name: "Tap Rhythm",
-        description: "Tippe im perfekten Takt! 🎵",
-        difficulty: "medium",
-        estimatedDuration: "45 Sek",
-        component: "TapRhythm",
-        tags: ["rhythm", "timing", "skill"],
-        dummyPartnerScore: { metric: "score", value: 5 },
     },
     {
         id: "mirror-match-1",
@@ -370,7 +349,7 @@ export const games = [
         estimatedDuration: "30 Sek",
         component: "LoveMeter",
         tags: ["precision", "timing", "love"],
-        dummyPartnerScore: { metric: "accuracy", value: 100 },
+        dummyPartnerScore: { metric: "attempts", value: 2 },
     },
 ];
 

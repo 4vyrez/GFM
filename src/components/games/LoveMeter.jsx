@@ -3,16 +3,17 @@ import { SparkleIcon } from '../icons/Icons';
 
 /**
  * LoveMeter Game - Hold to fill a heart gauge to exactly 100%
- * Precision timing game
+ * Level bounces back after hitting 100, goal is to release at exactly 100%
+ * Rated by attempts (fewer = better)
  */
 const LoveMeter = ({ onWin }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [isHolding, setIsHolding] = useState(false);
     const [level, setLevel] = useState(0);
+    const [direction, setDirection] = useState(1); // 1 = up, -1 = down
     const [won, setWon] = useState(false);
-    const [overshot, setOvershot] = useState(false);
     const [attempts, setAttempts] = useState(0);
-    const [bestScore, setBestScore] = useState(0);
+    const [lastResult, setLastResult] = useState(null);
 
     const intervalRef = useRef(null);
     const speedRef = useRef(1);
@@ -28,59 +29,74 @@ const LoveMeter = ({ onWin }) => {
         if (won) return;
 
         setIsHolding(true);
-        setOvershot(false);
+        setLastResult(null);
         speedRef.current = 1;
 
         intervalRef.current = setInterval(() => {
             setLevel(prev => {
-                const newLevel = prev + speedRef.current;
-                speedRef.current = Math.min(speedRef.current + 0.02, 3); // Accelerate
+                setDirection(d => {
+                    let newDirection = d;
+                    let newLevel = prev + (speedRef.current * d);
 
-                if (newLevel >= 120) {
-                    // Overshot too much!
-                    clearInterval(intervalRef.current);
-                    return 120;
+                    // Bounce at 100% and 0%
+                    if (newLevel >= 100) {
+                        newLevel = 100 - (newLevel - 100);
+                        newDirection = -1;
+                    } else if (newLevel <= 0) {
+                        newLevel = Math.abs(newLevel);
+                        newDirection = 1;
+                    }
+
+                    speedRef.current = Math.min(speedRef.current + 0.015, 2.5);
+                    return newDirection;
+                });
+
+                // Calculate new level with bounce
+                let computedLevel = prev + (speedRef.current * direction);
+                if (computedLevel >= 100) {
+                    computedLevel = 100 - (computedLevel - 100);
+                } else if (computedLevel <= 0) {
+                    computedLevel = Math.abs(computedLevel);
                 }
-                return newLevel;
+
+                return Math.max(0, Math.min(100, computedLevel));
             });
         }, 30);
-    }, [won]);
+    }, [won, direction]);
 
     const stopHolding = useCallback(() => {
         if (!isHolding || won) return;
 
         setIsHolding(false);
         clearInterval(intervalRef.current);
-        setAttempts(prev => prev + 1);
+        const currentAttempts = attempts + 1;
+        setAttempts(currentAttempts);
 
-        // Check result
-        if (level >= 95 && level <= 105) {
-            // Perfect!
+        const roundedLevel = Math.round(level);
+
+        // Win condition: exactly 100% (or 99-100 for slight tolerance)
+        if (roundedLevel >= 99 && roundedLevel <= 100) {
             setWon(true);
-            setBestScore(Math.round(level));
+            setLastResult('perfect');
             setTimeout(() => {
                 if (onWin) {
                     onWin({
                         gameId: 'love-meter-1',
-                        metric: 'accuracy',
-                        value: Math.round(level),
+                        metric: 'attempts',
+                        value: currentAttempts,
                     });
                 }
             }, 1500);
-        } else if (level > 105) {
-            // Overshot
-            setOvershot(true);
-            setBestScore(prev => Math.max(prev, Math.round(level)));
+        } else {
+            // Show result and reset
+            setLastResult(roundedLevel);
             setTimeout(() => {
                 setLevel(0);
-                setOvershot(false);
-            }, 1500);
-        } else {
-            // Too low, keep trying
-            setBestScore(prev => Math.max(prev, Math.round(level)));
-            setTimeout(() => setLevel(0), 500);
+                setDirection(1);
+                setLastResult(null);
+            }, 1200);
         }
-    }, [isHolding, level, won, onWin]);
+    }, [isHolding, level, won, onWin, attempts]);
 
     // Touch/mouse handlers
     const handleStart = (e) => {
@@ -93,22 +109,22 @@ const LoveMeter = ({ onWin }) => {
         stopHolding();
     };
 
-    const getHeartColor = () => {
-        if (won) return 'from-green-400 to-green-500';
-        if (overshot) return 'from-red-400 to-red-500';
-        if (level >= 95 && level <= 105) return 'from-yellow-400 to-green-400';
-        if (level > 80) return 'from-pink-400 to-red-400';
-        if (level > 50) return 'from-pink-300 to-pink-400';
-        return 'from-pink-200 to-pink-300';
-    };
-
     const getMessage = () => {
         if (won) return '💚 Perfekt! 100% Liebe!';
-        if (overshot) return '💔 Zu viel! Nochmal...';
-        if (level > 80) return '🔥 Fast da!';
-        if (level > 50) return '💗 Weiter so!';
-        if (level > 20) return '💕 Mehr Liebe!';
-        return '🤍 Halte gedrückt!';
+        if (lastResult === 'perfect') return '🎉 100% erreicht!';
+        if (lastResult !== null) return `${lastResult}% - ${lastResult > 50 ? 'Fast!' : 'Weiter versuchen!'} 🔄`;
+        if (isHolding && level >= 90) return '🔥 Fast da!';
+        if (isHolding && level >= 70) return '💗 Weiter so!';
+        if (isHolding) return '💕 Halte gedrückt...';
+        return '🤍 Halte gedrückt bis 100%!';
+    };
+
+    const getRating = () => {
+        if (!won) return null;
+        if (attempts === 1) return '🏆 FIRST TRY! Legendär!';
+        if (attempts === 2) return '⭐ Zweiter Versuch! Super!';
+        if (attempts <= 4) return '✨ Gut gemacht!';
+        return '👍 Geschafft!';
     };
 
     return (
@@ -125,10 +141,10 @@ const LoveMeter = ({ onWin }) => {
                     text-xl font-bold transition-all duration-300
                     ${won ? 'text-green-500 scale-105' : 'text-gray-700'}
                 `}>
-                    {won ? '🎉 Liebe perfektioniert!' : 'Fülle das Herz! 💕'}
+                    {won ? '🎉 Liebe perfektioniert!' : 'Fülle das Herz auf 100%! 💕'}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
-                    Halte gedrückt bis genau 100%
+                    {won ? getRating() : 'Lass bei genau 100% los - es springt zurück!'}
                 </p>
             </div>
 
@@ -161,9 +177,10 @@ const LoveMeter = ({ onWin }) => {
                                 height={level}
                                 className={`
                                     transition-all duration-100
-                                    ${level > 105 ? 'fill-red-400' :
-                                        level >= 95 ? 'fill-green-400' :
-                                            'fill-pink-400'}
+                                    ${level >= 99 ? 'fill-green-400' :
+                                        level >= 90 ? 'fill-yellow-400' :
+                                            level >= 70 ? 'fill-pink-400' :
+                                                'fill-pink-300'}
                                 `}
                             />
                         </g>
@@ -172,7 +189,7 @@ const LoveMeter = ({ onWin }) => {
                         <path
                             d="M50 88 C20 65, 5 45, 10 30 C15 15, 30 10, 50 25 C70 10, 85 15, 90 30 C95 45, 80 65, 50 88Z"
                             fill="none"
-                            stroke={won ? '#22C55E' : overshot ? '#EF4444' : '#F472B6'}
+                            stroke={won ? '#22C55E' : level >= 99 ? '#22C55E' : '#F472B6'}
                             strokeWidth="3"
                             className="transition-colors duration-300"
                         />
@@ -183,17 +200,24 @@ const LoveMeter = ({ onWin }) => {
                 <div className="absolute inset-0 flex items-center justify-center">
                     <span className={`
                         text-4xl font-black transition-all duration-200
-                        ${won ? 'text-green-500' : overshot ? 'text-red-500' : 'text-pink-500'}
+                        ${won ? 'text-green-500' : level >= 99 ? 'text-green-500' : 'text-pink-500'}
                         ${isHolding ? 'scale-110' : 'scale-100'}
                     `}>
-                        {Math.min(Math.round(level), 120)}%
+                        {Math.round(level)}%
                     </span>
                 </div>
 
-                {/* Target zone indicator - FIXED: only show when not won */}
+                {/* Direction indicator */}
+                {isHolding && !won && (
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 text-2xl animate-bounce">
+                        {direction === 1 ? '⬆️' : '⬇️'}
+                    </div>
+                )}
+
+                {/* Target zone indicator */}
                 {!won && (
-                    <div className="absolute right-2 top-0 h-full flex items-center pointer-events-none">
-                        <div className="flex flex-col items-center gap-0.5">
+                    <div className="absolute left-2 top-0 h-full flex items-start pointer-events-none">
+                        <div className="flex flex-col items-center gap-0.5 mt-2">
                             <span className="text-[8px] text-green-500 font-bold">100%</span>
                             <div className="w-0.5 h-4 bg-green-400/60 rounded-full" />
                         </div>
@@ -204,7 +228,7 @@ const LoveMeter = ({ onWin }) => {
             {/* Status message */}
             <p className={`
                 text-lg font-bold mb-4 transition-all duration-300
-                ${overshot ? 'text-red-500 animate-shake' :
+                ${lastResult !== null && lastResult !== 'perfect' ? 'text-orange-500' :
                     won ? 'text-green-500' : 'text-gray-600'}
             `}>
                 {getMessage()}
@@ -238,7 +262,6 @@ const LoveMeter = ({ onWin }) => {
             {/* Stats */}
             <div className="mt-4 flex gap-4 text-xs text-gray-400">
                 <span>Versuche: {attempts}</span>
-                {bestScore > 0 && <span>Bester: {bestScore}%</span>}
             </div>
 
             {/* Win celebration */}

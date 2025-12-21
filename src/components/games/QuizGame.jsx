@@ -5,7 +5,7 @@ import { SparkleIcon, HeartIcon } from '../icons/Icons';
  * Premium Quiz Game with slide-in animations
  */
 const QuizGame = ({ onWin }) => {
-    const questions = [
+    const allQuestions = [
         {
             question: 'Wann haben wir uns das erste Mal getroffen?',
             answers: ['07.11.2023', '14.11.2023', '21.11.2023', '28.11.2023'],
@@ -30,15 +30,59 @@ const QuizGame = ({ onWin }) => {
             correct: 3,
             emoji: '💕'
         },
+        {
+            question: 'Welches Tier mag ich am meisten?',
+            answers: ['Katzen', 'Hunde', 'Hasen', 'Vögel'],
+            correct: 0,
+            emoji: '🐱'
+        },
+        {
+            question: 'Was ist mein Lieblingsfilm-Genre?',
+            answers: ['Horror', 'Komödie', 'Action', 'Romance'],
+            correct: 3,
+            emoji: '🎬'
+        },
+        {
+            question: 'Welche Jahreszeit mag ich am liebsten?',
+            answers: ['Frühling', 'Sommer', 'Herbst', 'Winter'],
+            correct: 1,
+            emoji: '☀️'
+        },
+        {
+            question: 'Was trinke ich am liebsten?',
+            answers: ['Kaffee', 'Tee', 'Cola', 'Wasser'],
+            correct: 0,
+            emoji: '☕'
+        },
+        {
+            question: 'Wo würde ich am liebsten Urlaub machen?',
+            answers: ['Strand', 'Berge', 'Städtetrip', 'Zuhause mit dir'],
+            correct: 3,
+            emoji: '✈️'
+        },
+        {
+            question: 'Was ist meine Lieblingsblume?',
+            answers: ['Rosen', 'Tulpen', 'Sonnenblumen', 'Lilien'],
+            correct: 0,
+            emoji: '🌹'
+        },
     ];
+
+    // Pick 4-5 random questions for each playthrough
+    const [questions] = useState(() => {
+        const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, 5);
+    });
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState(null);
     const [correctAnswers, setCorrectAnswers] = useState(0);
+    const [streak, setStreak] = useState(0);
     const [showResult, setShowResult] = useState(false);
     const [attempts, setAttempts] = useState(1);
     const [isVisible, setIsVisible] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [hintsUsed, setHintsUsed] = useState(0);
 
     useEffect(() => {
         setTimeout(() => setIsVisible(true), 100);
@@ -52,6 +96,9 @@ const QuizGame = ({ onWin }) => {
 
         if (isCorrect) {
             setCorrectAnswers(prev => prev + 1);
+            setStreak(prev => prev + 1);
+        } else {
+            setStreak(0);
         }
 
         setTimeout(() => {

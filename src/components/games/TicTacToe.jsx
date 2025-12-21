@@ -4,7 +4,8 @@ import { SparkleIcon } from '../icons/Icons';
 const TicTacToe = ({ onWin }) => {
     const [board, setBoard] = useState(Array(9).fill(null));
     const [isPlayerTurn, setIsPlayerTurn] = useState(true);
-    const [gameStatus, setGameStatus] = useState('playing');
+    const [gameStatus, setGameStatus] = useState('selecting'); // selecting, playing, won, lost, draw
+    const [difficulty, setDifficulty] = useState('normal'); // easy, normal, hard
     const [attempts, setAttempts] = useState(1);
     const [moveCount, setMoveCount] = useState(0);
     const [isVisible, setIsVisible] = useState(false);
@@ -86,17 +87,25 @@ const TicTacToe = ({ onWin }) => {
             return -1;
         };
 
-        moveIndex = findWinningMove('O');
-        if (moveIndex === -1) moveIndex = findWinningMove('X');
-        if (moveIndex === -1 && newBoard[4] === null) moveIndex = 4;
-        if (moveIndex === -1) {
-            const corners = [0, 2, 6, 8].filter(idx => newBoard[idx] === null);
-            if (corners.length > 0) {
-                moveIndex = corners[Math.floor(Math.random() * corners.length)];
-            }
-        }
-        if (moveIndex === -1) {
+        // Easy mode: 50% chance to make a mistake
+        if (difficulty === 'easy' && Math.random() < 0.5) {
             moveIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+        } else {
+            // Normal/Hard: Try to win or block
+            moveIndex = findWinningMove('O');
+            if (moveIndex === -1) moveIndex = findWinningMove('X');
+            if (moveIndex === -1 && newBoard[4] === null) moveIndex = 4;
+            if (moveIndex === -1) {
+                const corners = [0, 2, 6, 8].filter(idx => newBoard[idx] === null);
+                if (corners.length > 0) {
+                    moveIndex = corners[Math.floor(Math.random() * corners.length)];
+                }
+            }
+            // Hard mode: Never miss a winning opportunity (already covered above)
+            // Normal mode: Occasionally pick random
+            if (moveIndex === -1 || (difficulty === 'normal' && Math.random() < 0.2)) {
+                moveIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+            }
         }
 
         newBoard[moveIndex] = 'O';
@@ -121,18 +130,28 @@ const TicTacToe = ({ onWin }) => {
     const resetGame = () => {
         setBoard(Array(9).fill(null));
         setIsPlayerTurn(true);
-        setGameStatus('playing');
+        setGameStatus('selecting');
         setAttempts(prev => prev + 1);
         setMoveCount(0);
         setWinningLine([]);
         setLastMove(null);
     };
 
+    const startGame = (diff) => {
+        setDifficulty(diff);
+        setBoard(Array(9).fill(null));
+        setIsPlayerTurn(true);
+        setGameStatus('playing');
+        setMoveCount(0);
+        setWinningLine([]);
+        setLastMove(null);
+    };
+
     const getStatusMessage = () => {
-        if (gameStatus === 'won') return '🎉 Du hast gewonnen!';
-        if (gameStatus === 'lost') return '😈 Ich hab gewonnen!';
-        if (gameStatus === 'draw') return '🤝 Unentschieden!';
-        return isPlayerTurn ? 'Du bist dran 💕' : 'Ich überlege... 🤔';
+        if (gameStatus === 'won') return '🎉 GG! Du hast gewonnen!';
+        if (gameStatus === 'lost') return '😈 Ich hab gewonnen! Rematch?';
+        if (gameStatus === 'draw') return '🤝 Unentschieden! Wir sind beide gut!';
+        return isPlayerTurn ? 'Du bist dran 💕' : 'Hmm... ich überlege... 🤔';
     };
 
     return (
@@ -160,9 +179,39 @@ const TicTacToe = ({ onWin }) => {
                     ${gameStatus === 'won' ? 'text-green-500 scale-105' :
                         gameStatus === 'lost' ? 'text-red-400' : 'text-gray-700'}
                 `}>
-                    {getStatusMessage()}
+                    {gameStatus === 'selecting' ? 'Wähle Schwierigkeit! 🎮' : getStatusMessage()}
                 </p>
             </div>
+
+            {/* Difficulty Selection */}
+            {gameStatus === 'selecting' && (
+                <div className="flex flex-col items-center gap-4 mb-6 animate-fade-in">
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => startGame('easy')}
+                            className="px-6 py-3 rounded-xl font-bold bg-gradient-to-br from-green-400 to-green-500 text-white shadow-md hover:scale-105 transition-transform"
+                        >
+                            😊 Leicht
+                        </button>
+                        <button
+                            onClick={() => startGame('normal')}
+                            className="px-6 py-3 rounded-xl font-bold bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-md hover:scale-105 transition-transform"
+                        >
+                            😏 Normal
+                        </button>
+                        <button
+                            onClick={() => startGame('hard')}
+                            className="px-6 py-3 rounded-xl font-bold bg-gradient-to-br from-red-400 to-red-500 text-white shadow-md hover:scale-105 transition-transform"
+                        >
+                            🔥 Schwer
+                        </button>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                        {difficulty === 'easy' ? 'Der Bot macht Fehler' :
+                            difficulty === 'hard' ? 'Der Bot spielt optimal' : 'Ausgewogen'}
+                    </p>
+                </div>
+            )}
 
             {/* Game Board with 3D perspective */}
             <div className="perspective-1000 w-full max-w-sm mx-auto mb-8">

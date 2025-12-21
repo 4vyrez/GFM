@@ -10,8 +10,9 @@ const MemoryCards = ({ onWin }) => {
     const [flipped, setFlipped] = useState([]);
     const [matched, setMatched] = useState([]);
     const [moves, setMoves] = useState(0);
-    const [attempts, setAttempts] = useState(1);
     const [won, setWon] = useState(false);
+    const [isPerfect, setIsPerfect] = useState(false);
+    const [attempts, setAttempts] = useState(1);
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
@@ -50,6 +51,8 @@ const MemoryCards = ({ onWin }) => {
                 setFlipped([]);
 
                 if (newMatched.length === cards.length) {
+                    const perfectScore = (moves + 1) === (cards.length / 2);
+                    setIsPerfect(perfectScore);
                     setWon(true);
                     setTimeout(() => {
                         if (onWin) {

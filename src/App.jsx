@@ -30,21 +30,19 @@ import ButtonChase from './components/games/ButtonChase';
 import FakeUpdate from './components/games/FakeUpdate';
 // New Games - Memory/Puzzle
 import SequenceMemory from './components/games/SequenceMemory';
-import PathFinder from './components/games/PathFinder';
+import GhostDownload from './components/games/GhostDownload';
 // New Games - Word/Insider
 import LoveCode from './components/games/LoveCode';
 import MegalodonQuiz from './components/games/MegalodonQuiz';
 import MemeQuiz from './components/games/MemeQuiz';
 // New Games - Emotional/Easy
-import BubblePop from './components/games/BubblePop';
+import HistoryQuiz from './components/games/HistoryQuiz';
 import ComplimentReveal from './components/games/ComplimentReveal';
 import BiteMeter from './components/games/BiteMeter';
 // New Games - Meta
 import StreakGuardian from './components/games/StreakGuardian';
 // New Games - Creative Additions
-import EmojiScramble from './components/games/EmojiScramble';
 import LuckySpin from './components/games/LuckySpin';
-import TapRhythm from './components/games/TapRhythm';
 import MirrorMatch from './components/games/MirrorMatch';
 import LoveMeter from './components/games/LoveMeter';
 // UX Enhancement Features
@@ -53,6 +51,8 @@ import CountdownWidget from './components/CountdownWidget';
 import AmbientConfetti from './components/AmbientConfetti';
 import ThemeOverlay from './components/ThemeOverlay';
 import LoginScreen from './components/LoginScreen';
+import SpecialDateOverlay from './components/SpecialDateOverlay';
+import { getSpecialDateForToday } from './data/specials';
 import { photos, messages, getRandomItem, getNextPhoto, getNextMessage } from './data/content';
 import { getGameById, games } from './data/games';
 import { SparkleIcon, FlameIcon, ConfettiIcon } from './components/icons/Icons';
@@ -154,6 +154,7 @@ function App() {
   const [showMilestone, setShowMilestone] = useState(false);
   const [milestoneStreak, setMilestoneStreak] = useState(0);
   const [showInventory, setShowInventory] = useState(false);
+  const [showSpecialDate, setShowSpecialDate] = useState(false);
 
   // Handle login
   const handleLogin = (code) => {
@@ -177,6 +178,17 @@ function App() {
 
   useEffect(() => {
     initializeApp();
+    // Check for special dates (birthday, anniversary)
+    const specialDate = getSpecialDateForToday();
+    if (specialDate) {
+      // Check if we've already shown this special today
+      const lastShownSpecialDate = localStorage.getItem('gfm_last_special_date');
+      const today = new Date().toISOString().split('T')[0];
+      if (lastShownSpecialDate !== today) {
+        setShowSpecialDate(true);
+        localStorage.setItem('gfm_last_special_date', today);
+      }
+    }
   }, []);
 
   const initializeApp = () => {
@@ -400,23 +412,21 @@ function App() {
     CaptchaCats,
     ButtonChase,
     FakeUpdate,
+    GhostDownload,
     // New Games - Memory/Puzzle
     SequenceMemory,
-    PathFinder,
     // New Games - Word/Insider
     LoveCode,
     MegalodonQuiz,
     MemeQuiz,
     // New Games - Emotional/Easy
-    BubblePop,
+    HistoryQuiz,
     ComplimentReveal,
     BiteMeter,
     // New Games - Meta
     StreakGuardian,
     // New Games - Creative Additions
-    EmojiScramble,
     LuckySpin,
-    TapRhythm,
     MirrorMatch,
     LoveMeter,
   };
@@ -463,6 +473,13 @@ function App() {
           isVisible={showMilestone}
           onClose={() => setShowMilestone(false)}
         />
+
+        {/* Special Date Overlay (Birthday, Anniversary) */}
+        {showSpecialDate && (
+          <SpecialDateOverlay
+            onClose={() => setShowSpecialDate(false)}
+          />
+        )}
 
         {/* Inventory Drawer */}
         <Inventory

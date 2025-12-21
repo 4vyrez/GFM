@@ -8,9 +8,111 @@
  * - 30 days: Ein ganzer Monat!
  * - 50 days: Mega-Streak!
  * - 100 days: Legendärer Streak!
+ * 
+ * DATE-BASED SPECIALS:
+ * - August 15: Girlfriend's Birthday 🎂
+ * - August 18: Anniversary (First Date) 💕
+ * 
+ * ============================================================
+ * HOW TO ADD YOUR OWN SPECIAL NOTES:
+ * ============================================================
+ * 
+ * Add a new object to the "specials" array below with:
+ * 
+ * {
+ *     id: "unique-id",           // Unique identifier
+ *     name: "Special Name",      // Display name
+ *     type: "date",              // Use "date" for date-based specials
+ *     triggerType: "date",       // How it triggers
+ *     triggerMonth: 8,           // Month number (1-12)
+ *     triggerDay: 15,            // Day of month (1-31)
+ *     icon: "🎂",                // Emoji to display
+ *     title: "Happy Birthday!",  // Main title
+ *     message: "Your message",   // Your custom message
+ *     specialImage: "filename.jpeg", // Optional: image in public/images/special/
+ *     animation: "confetti"      // Animation type: confetti, sparkle, birthday, hearts
+ * }
+ * 
+ * SPECIAL IMAGES:
+ * Place your special images in: public/images/special/
+ * - anniversary.jpeg  ← Your custom anniversary image
+ * - birthday.jpeg     ← Your custom birthday image  
+ * ============================================================
  */
 
 export const specials = [
+    // === DATE-BASED SPECIALS ===
+    // These trigger automatically on specific dates!
+
+    /**
+     * GIRLFRIEND'S BIRTHDAY - August 15
+     * Customize the message below!
+     */
+    {
+        id: "birthday-girlfriend",
+        name: "Geburtstag",
+        type: "date",
+        triggerType: "date",
+        triggerMonth: 8,  // August
+        triggerDay: 15,
+        icon: "🎂",
+        title: "Alles Gute zum Geburtstag! 🎉",
+        message: "Happy Birthday, mein Schatz! 🎂🎈 Heute ist dein besonderer Tag und user dritter Geburtstag den wir zusammen verbringen können! 💖",
+        specialImage: "birthday.jpeg", // Place in public/images/special/
+        animation: "birthday",
+        reward: {
+            title: "Geburtstags-Special",
+            message: "Ein ganz besonderer Tag für dich! 🎂",
+            emoji: "🎈",
+            animation: "confetti"
+        }
+    },
+
+    /**
+     * ANNIVERSARY - July 11
+     * Our First Date celebration!
+     * Customize the message and add your special image.
+     */
+    {
+        id: "anniversary-first-date",
+        name: "Unser Jahrestag",
+        type: "date",
+        triggerType: "date",
+        triggerMonth: 7,  // July
+        triggerDay: 11,
+        icon: "💕",
+        title: "Unser Jahrestag! 💕",
+        message: "Heute vor zwei Jahren hat alles angefangen... Ich erinnere mich noch genau an den Moment, als du aus der Bahn gestiegen bist. Danke. 💖",
+        specialImage: "anniversary.jpeg", // Place YOUR special image in public/images/special/
+        animation: "hearts",
+        reward: {
+            title: "Jahrestags-Special",
+            message: "Zwei Jahre voller Liebe und Abenteuer! 💕",
+            emoji: "💖",
+            animation: "sparkle"
+        }
+    },
+
+    // ============================================================
+    // ADD YOUR OWN SPECIAL NOTES BELOW!
+    // Copy this template and customize:
+    // ============================================================
+    /*
+    {
+        id: "special-valentines",
+        name: "Valentinstag",
+        type: "date",
+        triggerType: "date",
+        triggerMonth: 2,  // February
+        triggerDay: 14,
+        icon: "💝",
+        title: "Happy Valentine's Day!",
+        message: "Ich liebe dich so sehr! 💕",
+        animation: "hearts"
+    },
+    */
+
+
     // === STREAK MILESTONE SPECIALS ===
     {
         id: "milestone-7",
@@ -73,7 +175,7 @@ export const specials = [
         reward: {
             title: "Goldpokal",
             message: "50 Tage! Du bist unschlagbar! Hier ist dein Gold-Award! 🏆",
-            emoji: "�",
+            emoji: "🏆",
             animation: "trophy",
         },
         dateIdea: {
@@ -149,6 +251,36 @@ export const getSpecialsByType = (type) => {
 };
 
 /**
+ * Check if today is a special date
+ * @returns {Object|null} The date-based special for today, or null if none
+ */
+export const getSpecialDateForToday = () => {
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1; // getMonth() is 0-indexed
+    const currentDay = today.getDate();
+
+    return specials.find(special =>
+        special.triggerType === 'date' &&
+        special.triggerMonth === currentMonth &&
+        special.triggerDay === currentDay
+    ) || null;
+};
+
+/**
+ * Check if a specific date has a special
+ * @param {number} month - Month (1-12)
+ * @param {number} day - Day of month (1-31)
+ * @returns {Object|null} The special for that date, or null
+ */
+export const getSpecialForDate = (month, day) => {
+    return specials.find(special =>
+        special.triggerType === 'date' &&
+        special.triggerMonth === month &&
+        special.triggerDay === day
+    ) || null;
+};
+
+/**
  * Check if a special should be triggered
  */
 export const checkSpecialTrigger = (streak, totalVisits, unlockedSpecials = []) => {
@@ -165,6 +297,7 @@ export const checkSpecialTrigger = (streak, totalVisits, unlockedSpecials = []) 
             // Unlock-based specials triggered by streak
             triggeredSpecials.push(special);
         }
+        // Note: Date-based specials are handled separately via getSpecialDateForToday()
     });
 
     return triggeredSpecials;

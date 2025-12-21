@@ -28,11 +28,12 @@ const BiteMeter = ({ onWin }) => {
     };
 
     const getMessage = () => {
-        if (level < 20) return { text: 'Unglaublich brav heute! 😇', emoji: '🐱' };
-        if (level < 40) return { text: 'Nur kleine Knabbereien? 😏', emoji: '🦊' };
-        if (level < 60) return { text: 'Die perfekte Balance! 💕', emoji: '🐰' };
-        if (level < 80) return { text: 'Okay, bisschen wild heute! 😈', emoji: '🐺' };
-        return { text: 'CHAOS-BISS aktiviert! 🔥', emoji: '🦈' };
+        if (level < 15) return { text: 'Ein Engel! Keine Zähne! 😇', emoji: '🐱' };
+        if (level < 30) return { text: 'Nur leichtes Knabbern... süß! 🥰', emoji: '🦊' };
+        if (level < 50) return { text: 'Die perfekte Balance! 💕', emoji: '🐰' };
+        if (level < 70) return { text: 'Okay, bisschen wild heute! 🔥', emoji: '🐺' };
+        if (level < 85) return { text: 'DANGER ZONE betreten! 😈', emoji: '🦁' };
+        return { text: 'MAXIMUM CHAOS UNLOCKED! 🦈💀', emoji: '🦈' };
     };
 
     const getGradient = () => {

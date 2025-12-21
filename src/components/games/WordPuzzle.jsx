@@ -6,7 +6,7 @@ import { SparkleIcon } from '../icons/Icons';
  */
 const WordPuzzle = ({ onWin }) => {
     const gridSize = 8;
-    const wordsToFind = ['LIEBE', 'HERZ', 'KUSS', 'PAAR'];
+    const wordsToFind = ['LIEBE', 'HERZ', 'KUSS', 'PAAR', 'GERN', 'EWIG'];
 
     const [grid, setGrid] = useState([]);
     const [foundWords, setFoundWords] = useState([]);

@@ -77,6 +77,41 @@ const MemeQuiz = ({ onWin }) => {
             emoji: '😎',
             explanation: 'Maximum toxicity achieved'
         },
+        {
+            question: "Was bedeutet 'Lag'?",
+            options: ['Level aufsteigen', 'Verbindungsverzögerung', 'Lange Abwesenheit', 'Langsam gehen'],
+            correct: 1,
+            emoji: '📶',
+            explanation: 'Wenn das Internet streikt...'
+        },
+        {
+            question: "Was ist ein 'Nerf'?",
+            options: ['Ein Spielzeug', 'Eine Abschwächung', 'Ein Neustart', 'Ein Fehler'],
+            correct: 1,
+            emoji: '⚖️',
+            explanation: 'RIP lieblings Waffe...'
+        },
+        {
+            question: "Was bedeutet 'Buff'?",
+            options: ['Starker Spieler', 'Eine Verstärkung', 'Bessere Grafik', 'Bugfix'],
+            correct: 1,
+            emoji: '💪',
+            explanation: 'Endlich ist mein Main gut!'
+        },
+        {
+            question: "Was ist 'Griefing'?",
+            options: ['Traurig sein', 'Anderen das Spiel ruinieren', 'Grafik verbessern', 'Schnell leveln'],
+            correct: 1,
+            emoji: '😠',
+            explanation: '*baut deine Minecraft Basis ab*'
+        },
+        {
+            question: "Was bedeutet 'RNG'?",
+            options: ['Really Nice Game', 'Random Number Generator', 'Run N Gun', 'Rage No Good'],
+            correct: 1,
+            emoji: '🎲',
+            explanation: 'Glück oder Pech, wer weiß?'
+        },
     ];
 
     // Shuffle and pick 5 random questions

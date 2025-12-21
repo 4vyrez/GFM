@@ -8,12 +8,14 @@ import { SparkleIcon, FlameIcon } from '../icons/Icons';
 const StreakGuardian = ({ onWin }) => {
     const [isActive, setIsActive] = useState(false);
     const [shieldActive, setShieldActive] = useState(false);
+    const [shieldEnergy, setShieldEnergy] = useState(100);
     const [drops, setDrops] = useState([]);
     const [timeLeft, setTimeLeft] = useState(15);
     const [flameHealth, setFlameHealth] = useState(100);
     const [won, setWon] = useState(false);
     const [lost, setLost] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
+    const [dropsBlocked, setDropsBlocked] = useState(0);
     const gameLoopRef = useRef(null);
     const dropIdRef = useRef(0);
 
@@ -28,6 +30,8 @@ const StreakGuardian = ({ onWin }) => {
         setIsActive(true);
         setTimeLeft(15);
         setFlameHealth(100);
+        setShieldEnergy(100);
+        setDropsBlocked(0);
         setDrops([]);
         setWon(false);
         setLost(false);
@@ -101,8 +105,28 @@ const StreakGuardian = ({ onWin }) => {
         return () => clearInterval(moveInterval);
     }, [isActive, shieldActive]);
 
+    // Shield energy management
+    useEffect(() => {
+        if (!isActive) return;
+
+        const energyInterval = setInterval(() => {
+            if (shieldActive && shieldEnergy > 0) {
+                setShieldEnergy(prev => Math.max(0, prev - 5));
+            } else if (!shieldActive && shieldEnergy < 100) {
+                setShieldEnergy(prev => Math.min(100, prev + 3));
+            }
+        }, 100);
+
+        return () => clearInterval(energyInterval);
+    }, [isActive, shieldActive, shieldEnergy]);
+
     const toggleShield = (active) => {
-        setShieldActive(active);
+        // Only allow shield if there's energy
+        if (active && shieldEnergy > 0) {
+            setShieldActive(true);
+        } else {
+            setShieldActive(false);
+        }
     };
 
     if (won) {
@@ -148,17 +172,29 @@ const StreakGuardian = ({ onWin }) => {
                 </p>
 
                 {isActive && (
-                    <div className="flex justify-center items-center gap-2 mt-2">
-                        <span className="text-xs text-gray-400">Health:</span>
-                        <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                                className={`h-full transition-all duration-300 ${flameHealth > 50 ? 'bg-green-400' :
+                    <div className="flex justify-center items-center gap-4 mt-2">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400">❤️ Health:</span>
+                            <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                    className={`h-full transition-all duration-300 ${flameHealth > 50 ? 'bg-green-400' :
                                         flameHealth > 25 ? 'bg-yellow-400' : 'bg-red-400'
-                                    }`}
-                                style={{ width: `${flameHealth}%` }}
-                            />
+                                        }`}
+                                    style={{ width: `${flameHealth}%` }}
+                                />
+                            </div>
                         </div>
-                        <span className="text-xs font-bold">{flameHealth}%</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400">🛡️ Shield:</span>
+                            <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                    className={`h-full transition-all duration-300 ${shieldEnergy > 50 ? 'bg-blue-400' :
+                                        shieldEnergy > 25 ? 'bg-blue-300' : 'bg-blue-200'
+                                        }`}
+                                    style={{ width: `${shieldEnergy}%` }}
+                                />
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

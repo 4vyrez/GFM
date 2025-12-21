@@ -14,6 +14,8 @@ const ButtonChase = ({ onWin }) => {
     const [message, setMessage] = useState('');
     const [startTime, setStartTime] = useState(null);
     const [elapsedTime, setElapsedTime] = useState(0);
+    const [combo, setCombo] = useState(0);
+    const [lastCatchTime, setLastCatchTime] = useState(null);
     const containerRef = useRef(null);
     const timerRef = useRef(null);
     const requiredCatches = 3;
@@ -26,6 +28,14 @@ const ButtonChase = ({ onWin }) => {
         'Fang mich doch! 😈',
         'Git gud! 🎮',
         'Too slow, noob! 😏',
+        'Skill issue! 🎯',
+        'Lag? Nope, du bist langsam! 📶',
+        'DODGE! 🏃‍♂️',
+        'Try harder! 💪',
+        'Nice try! 👏',
+        'Almost! ...not 😏',
+        'You need more FPS! 🖥️',
+        'Outplayed! 🎮',
     ];
 
     useEffect(() => {

@@ -80,8 +80,8 @@ const ColorMatch = ({ onWin }) => {
                         if (onWin) {
                             onWin({
                                 gameId: 'color-match-1',
-                                metric: 'level',
-                                value: level,
+                                metric: 'attempts',
+                                value: attempts,
                             });
                         }
                     }, 1500);

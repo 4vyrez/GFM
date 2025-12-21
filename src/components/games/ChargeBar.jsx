@@ -48,8 +48,8 @@ const ChargeBar = ({ onWin }) => {
                 if (onWin) {
                     onWin({
                         gameId: 'charge-bar-1',
-                        metric: 'attempts',
-                        value: attempts,
+                        metric: 'accuracy',
+                        value: charge,
                     });
                 }
             }, 1500);

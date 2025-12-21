@@ -6,13 +6,24 @@ import { SparkleIcon } from '../icons/Icons';
  * Click cards to reveal sweet messages
  */
 const ComplimentReveal = ({ onWin }) => {
-    const compliments = [
+    const allCompliments = [
         { id: 1, text: 'Du bist wunderschön 💕', emoji: '✨' },
         { id: 2, text: 'Dein Lachen ist magisch 🌟', emoji: '😊' },
         { id: 3, text: 'Du machst mich happy 🌈', emoji: '💝' },
         { id: 4, text: 'Mit dir ist alles besser 🦋', emoji: '🌸' },
         { id: 5, text: 'Du bist einzigartig 💎', emoji: '⭐' },
+        { id: 6, text: 'Du bist mein Sonnenschein 🌞', emoji: '☀️' },
+        { id: 7, text: 'Ich liebe deine Stimme 🎵', emoji: '💫' },
+        { id: 8, text: 'Du riechst immer so gut 🌹', emoji: '🌺' },
+        { id: 9, text: 'Du bist meine beste Freundin 👯', emoji: '💖' },
+        { id: 10, text: 'Du inspirierst mich jeden Tag 🔥', emoji: '🦋' },
     ];
+
+    // Pick 5 random compliments
+    const [compliments] = useState(() => {
+        const shuffled = [...allCompliments].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, 5);
+    });
 
     const [revealed, setRevealed] = useState([]);
     const [won, setWon] = useState(false);

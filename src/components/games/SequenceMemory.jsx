@@ -8,7 +8,7 @@ import { SparkleIcon } from '../icons/Icons';
 const SequenceMemory = ({ onWin, config = {} }) => {
     const { sequenceLength = 4 } = config;
 
-    const allEmojis = ['🐱', '❤️', '🎮', '⭐', '🌸', '🦋', '🌈', '🍕'];
+    const allEmojis = ['🐱', '❤️', '🎮', '⭐', '🌸', '🦋', '🌈', '🍕', '🎵', '🔥'];
 
     const [sequence, setSequence] = useState([]);
     const [displayedEmojis, setDisplayedEmojis] = useState([]);
@@ -17,6 +17,8 @@ const SequenceMemory = ({ onWin, config = {} }) => {
     const [gamePhase, setGamePhase] = useState('waiting'); // waiting, showing, playing, won, lost
     const [attempts, setAttempts] = useState(1);
     const [isVisible, setIsVisible] = useState(false);
+    const [startTime, setStartTime] = useState(null);
+    const [completionTime, setCompletionTime] = useState(null);
 
     useEffect(() => {
         setTimeout(() => setIsVisible(true), 100);
@@ -42,7 +44,9 @@ const SequenceMemory = ({ onWin, config = {} }) => {
         setSequence(newSequence);
         setDisplayedEmojis(displayed);
         setPlayerSequence([]);
+        setIsShowingSequence(true); // Set to true when sequence starts showing
         setGamePhase('showing');
+        setStartTime(Date.now()); // Start time when the sequence begins to show
         showSequence(newSequence);
     };
 
@@ -76,13 +80,15 @@ const SequenceMemory = ({ onWin, config = {} }) => {
 
         // Check if complete
         if (newPlayerSequence.length === sequence.length) {
+            const timeTaken = Math.round((Date.now() - startTime) / 1000);
+            setCompletionTime(timeTaken);
             setGamePhase('won');
             setTimeout(() => {
                 if (onWin) {
                     onWin({
                         gameId: 'sequence-memory-1',
-                        metric: 'attempts',
-                        value: attempts,
+                        metric: 'seconds',
+                        value: timeTaken,
                     });
                 }
             }, 1500);
@@ -102,7 +108,7 @@ const SequenceMemory = ({ onWin, config = {} }) => {
             case 'waiting': return 'Bereit? Merk dir die Reihenfolge!';
             case 'showing': return 'Schau genau hin... 👀';
             case 'playing': return `Dein Zug! (${playerSequence.length}/${sequence.length})`;
-            case 'won': return 'Perfekt! Du hast es dir gemerkt! 🧠';
+            case 'won': return `Perfekt in ${completionTime}s! 🧠✨`;
             case 'lost': return 'Ups! Das war nicht richtig 😅';
             default: return '';
         }
@@ -147,7 +153,7 @@ const SequenceMemory = ({ onWin, config = {} }) => {
                                 }
                             `}
                         >
-                            {showingIndex >= index ? emoji : '?'}
+                            {showingIndex === index ? emoji : '?'}
                         </div>
                     ))}
                 </div>

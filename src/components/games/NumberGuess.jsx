@@ -60,8 +60,9 @@ const NumberGuess = ({ onWin }) => {
         } else if (guessNum < secretNumber) {
             setLastGuessDirection('up');
             const diff = secretNumber - guessNum;
+            const evenOdd = secretNumber % 2 === 0 ? '(Gerade Zahl!)' : '(Ungerade!)';
             if (diff <= 5) {
-                setFeedback('🔥 Ganz heiß! Etwas höher!');
+                setFeedback(`🔥 Ganz heiß! Etwas höher! ${evenOdd}`);
             } else if (diff <= 15) {
                 setFeedback('📈 Höher!');
             } else {
@@ -70,8 +71,9 @@ const NumberGuess = ({ onWin }) => {
         } else {
             setLastGuessDirection('down');
             const diff = guessNum - secretNumber;
+            const evenOdd = secretNumber % 2 === 0 ? '(Gerade Zahl!)' : '(Ungerade!)';
             if (diff <= 5) {
-                setFeedback('🔥 Ganz heiß! Etwas niedriger!');
+                setFeedback(`🔥 Ganz heiß! Etwas niedriger! ${evenOdd}`);
             } else if (diff <= 15) {
                 setFeedback('📉 Niedriger!');
             } else {

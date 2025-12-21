@@ -14,12 +14,14 @@ const LuckySpin = ({ onWin }) => {
     const [attempts, setAttempts] = useState(0);
 
     const segments = [
-        { label: '💋 Kuss', color: 'from-pink-400 to-pink-500', prize: 'Ein süßer Kuss!' },
+        { label: '💋 Kuss', color: 'from-pink-400 to-pink-500', prize: 'Ein Kuss!' },
         { label: '🤗 Umarmung', color: 'from-purple-400 to-purple-500', prize: 'Eine dicke Umarmung!' },
         { label: '💝 Liebe', color: 'from-red-400 to-red-500', prize: 'Unendlich viel Liebe!' },
         { label: '⭐ Wunsch', color: 'from-yellow-400 to-yellow-500', prize: 'Ein Wunsch frei!' },
-        { label: '🌸 Blume', color: 'from-rose-400 to-rose-500', prize: 'Eine Blume für dich!' },
-        { label: '🎁 Überraschung', color: 'from-indigo-400 to-indigo-500', prize: 'Eine Überraschung!' },
+        { label: '🌸 Blume', color: 'from-rose-400 to-rose-500', prize: 'Mein Herz für dich!' },
+        { label: '🎁 Date', color: 'from-indigo-400 to-indigo-500', prize: 'Ein Date zusammen!' },
+        { label: '💆 Massage', color: 'from-teal-400 to-teal-500', prize: 'Eine entspannende Massage!' },
+        { label: '🍫 Süßes', color: 'from-amber-400 to-amber-500', prize: 'Was Süßes zum Naschen!' },
     ];
 
     const segmentAngle = 360 / segments.length;
