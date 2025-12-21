@@ -22,6 +22,7 @@ const SimonColors = ({ onWin, config = {} }) => {
     const [gamePhase, setGamePhase] = useState('waiting'); // waiting, showing, playing, won, lost
     const [attempts, setAttempts] = useState(1);
     const [isVisible, setIsVisible] = useState(false);
+    const [isPracticeMode, setIsPracticeMode] = useState(false);
     const timeoutRef = useRef(null);
 
     useEffect(() => {
@@ -88,7 +89,7 @@ const SimonColors = ({ onWin, config = {} }) => {
         if (newPlayerSequence.length === sequence.length) {
             setGamePhase('won');
             setTimeout(() => {
-                if (onWin) {
+                if (onWin && !isPracticeMode) {
                     onWin({
                         gameId: 'simon-colors-1',
                         metric: 'attempts',

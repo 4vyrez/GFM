@@ -12,6 +12,7 @@ const ChargeBar = ({ onWin }) => {
     const [won, setWon] = useState(false);
     const [attempts, setAttempts] = useState(1);
     const [isVisible, setIsVisible] = useState(false);
+    const [doubleMode, setDoubleMode] = useState(false);
     const intervalRef = useRef(null);
 
     useEffect(() => {
@@ -41,15 +42,16 @@ const ChargeBar = ({ onWin }) => {
         setIsCharging(false);
         setReleased(true);
 
-        // Win condition: 90-100%
-        if (charge >= 90 && charge <= 100) {
+        // Win condition: 90-100% (or 95-100% in double mode)
+        const winThreshold = doubleMode ? 95 : 90;
+        if (charge >= winThreshold && charge <= 100) {
             setWon(true);
             setTimeout(() => {
                 if (onWin) {
                     onWin({
                         gameId: 'charge-bar-1',
                         metric: 'accuracy',
-                        value: charge,
+                        value: doubleMode ? charge * 2 : charge,
                     });
                 }
             }, 1500);
@@ -72,8 +74,8 @@ const ChargeBar = ({ onWin }) => {
     };
 
     const getMessage = () => {
-        if (!released) return 'Halte gedrückt und lass bei ~100% los!';
-        if (won) return `Perfekt! Du hast bei ${charge}% losgelassen! 🎯`;
+        if (!released) return doubleMode ? 'DOUBLE MODE! Halte bei 95-100%! 🔥' : 'Halte gedrückt und lass bei ~100% los!';
+        if (won) return `${doubleMode ? '🔥 DOUBLE! ' : ''}Perfekt! Du hast bei ${charge}% losgelassen! 🎯`;
         if (charge >= 100) return 'Zu spät! Der Balken war schon voll 😅';
         if (charge >= 80) return `${charge}% - So nah dran! Versuch's nochmal! 💪`;
         return `${charge}% - Fast! Noch etwas länger halten! 🔋`;

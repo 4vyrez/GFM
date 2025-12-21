@@ -88,8 +88,9 @@ const LoveMeter = ({ onWin }) => {
                 }
             }, 1500);
         } else {
-            // Show result and reset
+            // Show result and reset - penalty: increases difficulty speed
             setLastResult(roundedLevel);
+            speedRef.current = Math.min(speedRef.current + 0.1, 2.0); // Slight speed increase as penalty
             setTimeout(() => {
                 setLevel(0);
                 setDirection(1);

@@ -83,6 +83,8 @@ const QuizGame = ({ onWin }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [hintsUsed, setHintsUsed] = useState(0);
+    const [eliminated, setEliminated] = useState([]);
+    const [lifelineUsed, setLifelineUsed] = useState(false);
 
     useEffect(() => {
         setTimeout(() => setIsVisible(true), 100);
@@ -131,9 +133,24 @@ const QuizGame = ({ onWin }) => {
         setCurrentQuestion(0);
         setSelectedAnswer(null);
         setCorrectAnswers(0);
+        setStreak(0);
         setShowResult(false);
         setAttempts(prev => prev + 1);
         setIsTransitioning(false);
+        setEliminated([]);
+        setLifelineUsed(false);
+    };
+
+    const use5050 = () => {
+        if (lifelineUsed || selectedAnswer !== null) return;
+
+        const correctIdx = questions[currentQuestion].correct;
+        const wrongIndices = [0, 1, 2, 3].filter(i => i !== correctIdx);
+        // Randomly select 2 wrong answers to eliminate
+        const shuffled = wrongIndices.sort(() => Math.random() - 0.5);
+        setEliminated(shuffled.slice(0, 2));
+        setLifelineUsed(true);
+        setHintsUsed(prev => prev + 1);
     };
 
     const currentQ = questions[currentQuestion];

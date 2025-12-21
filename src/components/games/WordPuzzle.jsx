@@ -17,6 +17,8 @@ const WordPuzzle = ({ onWin }) => {
     const [elapsedTime, setElapsedTime] = useState(0);
     const [gameState, setGameState] = useState('ready');
     const [isVisible, setIsVisible] = useState(false);
+    const [hintsUsed, setHintsUsed] = useState(0);
+    const [hintCells, setHintCells] = useState([]);
 
     useEffect(() => {
         setTimeout(() => setIsVisible(true), 100);

@@ -2,26 +2,31 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 /**
  * PhotoModal - Premium fullscreen photo viewer
- * Clean implementation with CSS-only animations and proper gestures
+ * Instantly displays photo at full size with beautiful animations
  */
 const PhotoModal = ({ photo, isOpen, onClose }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
-    const [isZoomed, setIsZoomed] = useState(false);
+    const [isEntering, setIsEntering] = useState(true);
     const [dragY, setDragY] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
 
     const containerRef = useRef(null);
     const touchStartY = useRef(0);
     const touchStartTime = useRef(0);
-    const lastTapTime = useRef(0);
 
     // Handle open/close state
     useEffect(() => {
         if (isOpen) {
             setIsVisible(true);
             setIsClosing(false);
+            setIsEntering(true);
             document.body.style.overflow = 'hidden';
+
+            // Trigger entrance animation
+            requestAnimationFrame(() => {
+                setTimeout(() => setIsEntering(false), 50);
+            });
         }
         return () => {
             document.body.style.overflow = '';
@@ -34,10 +39,9 @@ const PhotoModal = ({ photo, isOpen, onClose }) => {
         setTimeout(() => {
             setIsVisible(false);
             setIsClosing(false);
-            setIsZoomed(false);
             setDragY(0);
             onClose();
-        }, 300);
+        }, 350);
     }, [onClose]);
 
     // Handle escape key
@@ -51,47 +55,30 @@ const PhotoModal = ({ photo, isOpen, onClose }) => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, handleClose]);
 
-    // Double tap to zoom
-    const handleTap = (e) => {
-        const now = Date.now();
-        const timeSinceLastTap = now - lastTapTime.current;
-
-        if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
-            // Double tap detected
-            setIsZoomed(prev => !prev);
-            e.preventDefault();
-        }
-        lastTapTime.current = now;
-    };
-
     // Touch handlers for swipe-to-close
     const handleTouchStart = (e) => {
-        if (isZoomed) return;
         touchStartY.current = e.touches[0].clientY;
         touchStartTime.current = Date.now();
         setIsDragging(true);
     };
 
     const handleTouchMove = (e) => {
-        if (isZoomed || !isDragging) return;
+        if (!isDragging) return;
         const currentY = e.touches[0].clientY;
         const diff = currentY - touchStartY.current;
 
-        // Only allow downward drag
-        if (diff > 0) {
-            setDragY(diff * 0.6); // Dampening factor
-        }
+        // Allow drag in both directions for natural feel
+        setDragY(diff * 0.5); // Dampening factor
     };
 
     const handleTouchEnd = () => {
-        if (isZoomed) return;
         setIsDragging(false);
 
         const timeDiff = Date.now() - touchStartTime.current;
-        const velocity = dragY / timeDiff;
+        const velocity = Math.abs(dragY) / timeDiff;
 
         // Close if dragged far enough or fast enough
-        if (dragY > 120 || velocity > 0.5) {
+        if (Math.abs(dragY) > 100 || velocity > 0.4) {
             handleClose();
         } else {
             setDragY(0);
@@ -100,18 +87,15 @@ const PhotoModal = ({ photo, isOpen, onClose }) => {
 
     // Mouse drag for desktop
     const handleMouseDown = (e) => {
-        if (isZoomed) return;
         touchStartY.current = e.clientY;
         touchStartTime.current = Date.now();
         setIsDragging(true);
     };
 
     const handleMouseMove = (e) => {
-        if (isZoomed || !isDragging) return;
+        if (!isDragging) return;
         const diff = e.clientY - touchStartY.current;
-        if (diff > 0) {
-            setDragY(diff * 0.6);
-        }
+        setDragY(diff * 0.5);
     };
 
     const handleMouseUp = () => {
@@ -121,14 +105,15 @@ const PhotoModal = ({ photo, isOpen, onClose }) => {
 
     if (!isVisible) return null;
 
-    const opacity = Math.max(0, 1 - dragY / 300);
+    const opacity = Math.max(0, 1 - Math.abs(dragY) / 250);
+    const scale = Math.max(0.85, 1 - Math.abs(dragY) / 600);
 
     return (
         <div
             ref={containerRef}
             className={`
                 fixed inset-0 z-[100] flex items-center justify-center
-                transition-opacity duration-300 ease-out
+                transition-all duration-350 ease-out
                 ${isClosing ? 'opacity-0' : 'opacity-100'}
             `}
             onClick={handleClose}
@@ -136,101 +121,114 @@ const PhotoModal = ({ photo, isOpen, onClose }) => {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
         >
-            {/* Backdrop */}
+            {/* Premium gradient backdrop */}
             <div
-                className="absolute inset-0 bg-black/95 backdrop-blur-lg"
+                className="absolute inset-0 bg-gradient-to-b from-black via-black/98 to-black/95 backdrop-blur-xl"
                 style={{ opacity }}
             />
 
-            {/* Close button */}
+            {/* Subtle ambient glow */}
+            <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                    background: 'radial-gradient(ellipse at center, rgba(236, 72, 153, 0.08) 0%, transparent 60%)',
+                    opacity: isClosing ? 0 : 1,
+                    transition: 'opacity 0.3s ease-out'
+                }}
+            />
+
+            {/* Close button - premium design */}
             <button
                 onClick={(e) => {
                     e.stopPropagation();
                     handleClose();
                 }}
                 className={`
-                    absolute top-6 right-6 z-20
-                    w-11 h-11 rounded-full
-                    bg-white/10 hover:bg-white/20 backdrop-blur-sm
+                    absolute top-5 right-5 z-20
+                    w-12 h-12 rounded-full
+                    bg-white/10 hover:bg-white/20 active:bg-white/30
+                    backdrop-blur-md border border-white/10
                     flex items-center justify-center
-                    text-white text-2xl font-light
-                    transition-all duration-200
-                    transform ${isClosing ? 'scale-75 opacity-0' : 'scale-100 opacity-100'}
+                    text-white text-xl font-light
+                    transition-all duration-300 ease-out
+                    hover:scale-110 active:scale-95
+                    shadow-lg shadow-black/20
+                    transform ${isClosing || isEntering ? 'scale-75 opacity-0' : 'scale-100 opacity-100'}
                 `}
+                style={{ transitionDelay: isEntering ? '0ms' : '100ms' }}
             >
                 ✕
             </button>
 
-            {/* Swipe hint */}
+            {/* Swipe hint - elegant design */}
             <div className={`
-                absolute top-6 left-1/2 -translate-x-1/2 z-10
-                text-white/50 text-sm font-medium
+                absolute top-5 left-1/2 -translate-x-1/2 z-10
+                bg-white/5 backdrop-blur-md border border-white/10
+                px-4 py-2 rounded-full
+                text-white/60 text-sm font-medium
                 flex items-center gap-2
-                transition-all duration-300 delay-500
-                ${isClosing || dragY > 20 ? 'opacity-0' : 'opacity-100'}
-            `}>
-                <span className="animate-bounce">↓</span>
-                <span>Runter wischen zum Schließen</span>
+                transition-all duration-500
+                ${isClosing || Math.abs(dragY) > 20 || isEntering ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'}
+            `}
+                style={{ transitionDelay: isEntering ? '0ms' : '400ms' }}
+            >
+                <span className="animate-bounce text-xs">↕</span>
+                <span>Wischen zum Schließen</span>
             </div>
 
-            {/* Image container */}
+            {/* Image container - INSTANT FULL SIZE */}
             <div
                 onClick={(e) => e.stopPropagation()}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
                 onMouseDown={handleMouseDown}
-                onClickCapture={handleTap}
-                className={`
-                    relative select-none
-                    ${isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'}
-                `}
+                className="relative select-none cursor-grab active:cursor-grabbing"
                 style={{
-                    transform: `translateY(${dragY}px) scale(${isClosing ? 0.9 : isZoomed ? 1.8 : 1})`,
-                    opacity: isClosing ? 0 : opacity,
-                    transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out',
+                    transform: `translateY(${dragY}px) scale(${isClosing ? 0.85 : isEntering ? 0.9 : scale})`,
+                    opacity: isClosing ? 0 : isEntering ? 0.8 : opacity,
+                    transition: isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.35s ease-out',
                     willChange: 'transform, opacity',
                     backfaceVisibility: 'hidden',
                     transformOrigin: 'center center',
                 }}
             >
+                {/* Main image - FULL VIEWPORT SIZE */}
                 <img
                     src={`/photos/${photo.filename}`}
                     alt={photo.alt}
                     draggable={false}
-                    className={`
-                        max-w-[92vw] max-h-[85vh] 
-                        object-contain rounded-2xl
-                        shadow-2xl
-                        transition-shadow duration-300
-                        ${isZoomed ? 'shadow-black/50' : 'shadow-black/30'}
-                    `}
+                    className="max-w-[98vw] max-h-[94vh] w-auto h-auto object-contain rounded-xl shadow-2xl"
+                    style={{
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 100px rgba(236, 72, 153, 0.1)',
+                    }}
                 />
 
-                {/* Photo info badge */}
+                {/* Elegant frame border */}
+                <div
+                    className="absolute inset-0 rounded-xl pointer-events-none"
+                    style={{
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.05)'
+                    }}
+                />
+
+                {/* Photo info badge - minimal elegant */}
                 <div className={`
-                    absolute bottom-4 left-1/2 -translate-x-1/2
-                    bg-black/40 backdrop-blur-md
+                    absolute bottom-5 left-1/2 -translate-x-1/2
+                    bg-black/50 backdrop-blur-md border border-white/10
                     px-5 py-2.5 rounded-full
                     text-white/90 text-sm font-medium
-                    flex items-center gap-2
-                    transition-all duration-300
-                    ${isClosing || dragY > 30 || isZoomed ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}
-                `}>
-                    <span>📸</span>
+                    flex items-center gap-2.5
+                    transition-all duration-400
+                    shadow-lg
+                    ${isClosing || Math.abs(dragY) > 30 || isEntering ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}
+                `}
+                    style={{ transitionDelay: isEntering ? '0ms' : '200ms' }}
+                >
+                    <span className="text-base">📸</span>
                     <span>Unsere Erinnerung</span>
-                </div>
-
-                {/* Zoom hint */}
-                <div className={`
-                    absolute bottom-4 right-4
-                    bg-black/40 backdrop-blur-md
-                    px-3 py-1.5 rounded-full
-                    text-white/50 text-xs
-                    transition-all duration-300
-                    ${isZoomed || isClosing || dragY > 20 ? 'opacity-0' : 'opacity-100'}
-                `}>
-                    Doppeltipp = Zoom
+                    <span className="text-pink-400">💕</span>
                 </div>
             </div>
         </div>
