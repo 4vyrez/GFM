@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 
 /**
  * PhotoModal - Premium fullscreen photo viewer
+ * Uses React Portal to render above all other content
  * Instantly displays photo at full size with beautiful animations
  */
 const PhotoModal = ({ photo, isOpen, onClose }) => {
@@ -108,14 +110,16 @@ const PhotoModal = ({ photo, isOpen, onClose }) => {
     const opacity = Math.max(0, 1 - Math.abs(dragY) / 250);
     const scale = Math.max(0.85, 1 - Math.abs(dragY) / 600);
 
-    return (
+    // Use Portal to render at document.body level - ensures modal is ALWAYS on top
+    const modalContent = (
         <div
             ref={containerRef}
             className={`
-                fixed inset-0 z-[100] flex items-center justify-center
+                fixed inset-0 flex items-center justify-center
                 transition-all duration-350 ease-out
                 ${isClosing ? 'opacity-0' : 'opacity-100'}
             `}
+            style={{ zIndex: 99999 }}
             onClick={handleClose}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -233,6 +237,10 @@ const PhotoModal = ({ photo, isOpen, onClose }) => {
             </div>
         </div>
     );
+
+    // Render via Portal at document.body level - ensures modal is ALWAYS on top of everything
+    return createPortal(modalContent, document.body);
 };
 
 export default PhotoModal;
+
