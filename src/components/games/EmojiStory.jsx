@@ -42,10 +42,11 @@ const EmojiStory = ({ onWin }) => {
     const [startTime, setStartTime] = useState(null);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         const story = stories[Math.floor(Math.random() * stories.length)];
         setCurrentStory(story);
         setStartTime(Date.now());
+        return () => clearTimeout(timer);
     }, []);
 
     const handleEmojiClick = (emoji) => {
@@ -201,9 +202,9 @@ const EmojiStory = ({ onWin }) => {
             {won && (
                 <div className="text-center animate-slide-up">
                     <div className="flex items-center justify-center gap-2 text-green-500 mb-3">
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                         <span className="font-bold">Perfekte Geschichte!</span>
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     </div>
                     <button
                         onClick={resetGame}

@@ -168,6 +168,23 @@ export const ThemeProvider = ({ children }) => {
         return 'default';
     });
 
+    // Detect system color scheme preference
+    const [prefersDarkMode, setPrefersDarkMode] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        return false;
+    });
+
+    // Listen for system color scheme changes
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleChange = (e) => setPrefersDarkMode(e.matches);
+
+        mediaQuery.addEventListener('change', handleChange);
+        return () => mediaQuery.removeEventListener('change', handleChange);
+    }, []);
+
     useEffect(() => {
         // Apply theme to document
         document.documentElement.setAttribute('data-theme', currentTheme);
@@ -189,12 +206,19 @@ export const ThemeProvider = ({ children }) => {
 
     const getTheme = () => themes.find(t => t.id === currentTheme) || themes[0];
 
+    // Get suggested theme based on system preference (for first-time users)
+    const getSuggestedTheme = () => {
+        return prefersDarkMode ? 'dark-pro' : 'default';
+    };
+
     return (
         <ThemeContext.Provider value={{
             currentTheme,
             setTheme,
             getTheme,
-            themes
+            themes,
+            prefersDarkMode,
+            getSuggestedTheme
         }}>
             {children}
         </ThemeContext.Provider>

@@ -31,7 +31,8 @@ const PathFinder = ({ onWin }) => {
     const endPos = [4, 4];
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
+        return () => clearTimeout(timer);
     }, []);
 
     const isAdjacent = (pos1, pos2) => {
@@ -135,7 +136,7 @@ const PathFinder = ({ onWin }) => {
             <div className="text-center mb-6 w-full">
                 <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-xs px-4 py-1.5 rounded-full text-xs font-bold text-gray-400 mb-3 shadow-sm border border-white/50">
                     <span>Versuch #{attempts}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                    <span className="w-1 h-1 rounded-full bg-gray-300" aria-hidden="true" />
                     <span>{path.length} Schritte</span>
                 </div>
 
@@ -190,9 +191,9 @@ const PathFinder = ({ onWin }) => {
             {won && (
                 <div className="text-center animate-slide-up">
                     <div className="flex items-center justify-center gap-2 text-green-500 mb-2">
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                         <p className="text-lg font-bold">Super Navigator! 🧭</p>
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     </div>
                     <p className="text-gray-500 text-sm">
                         Du hast den Weg in {path.length} Schritten gefunden!

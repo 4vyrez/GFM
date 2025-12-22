@@ -23,8 +23,9 @@ const EmojiScramble = ({ onWin }) => {
     ];
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         initGame();
+        return () => clearTimeout(timer);
     }, []);
 
     const initGame = () => {
@@ -170,9 +171,9 @@ const EmojiScramble = ({ onWin }) => {
             {/* Win message */}
             {won && (
                 <div className="mt-6 flex items-center gap-2 text-green-500 animate-bounce-in">
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     <p className="font-bold">Emoji-Meister! 🏆</p>
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                 </div>
             )}
         </div>

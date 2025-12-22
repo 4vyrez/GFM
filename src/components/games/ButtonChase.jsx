@@ -20,6 +20,13 @@ const ButtonChase = ({ onWin }) => {
     const timerRef = useRef(null);
     const requiredCatches = 3;
 
+    // Difficulty escalation based on catches
+    const getDifficulty = () => {
+        if (catches === 0) return { level: 'Easy', dodgeSpeed: 300, dodgeDistance: 0.6, color: 'text-green-500' };
+        if (catches === 1) return { level: 'Medium', dodgeSpeed: 150, dodgeDistance: 0.8, color: 'text-yellow-500' };
+        return { level: 'Hard', dodgeSpeed: 50, dodgeDistance: 1.0, color: 'text-red-500' };
+    };
+
     const messages = [
         'Haha, zu langsam! 😜',
         'Fast! Aber nicht ganz! 💨',
@@ -27,21 +34,26 @@ const ButtonChase = ({ onWin }) => {
         'Netter Versuch! 🏃',
         'Fang mich doch! 😈',
         'Git gud! 🎮',
-        'Too slow, noob! 😏',
-        'Skill issue! 🎯',
+        'Zu langsam, Noob! 😏',
+        'Skill Issue! 🎯',
         'Lag? Nope, du bist langsam! 📶',
-        'DODGE! 🏃‍♂️',
-        'Try harder! 💪',
-        'Nice try! 👏',
-        'Almost! ...not 😏',
-        'You need more FPS! 🖥️',
+        'Ausgewichen! 🏃‍♂️',
+        'Streng dich mehr an! 💪',
+        'Guter Versuch! 👏',
+        'Fast! ...nicht 😏',
+        'Du brauchst mehr FPS! 🖥️',
         'Outplayed! 🎮',
+        'Ich werde schneller! ⚡',
+        'Level up! 📈',
+        'Zu einfach! 😎',
     ];
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         // Start the timer when game becomes visible
         setStartTime(Date.now());
+
+        return () => clearTimeout(timer);
     }, []);
 
     // Timer for live display
@@ -171,6 +183,20 @@ const ButtonChase = ({ onWin }) => {
                         />
                     ))}
                 </div>
+
+                {/* Difficulty Indicator */}
+                {!won && (
+                    <div className="flex justify-center mt-2 animate-fade-in">
+                        <span className={`
+                            text-xs font-bold px-3 py-1 rounded-full
+                            transition-all duration-300
+                            ${getDifficulty().color}
+                            ${catches === 0 ? 'bg-green-100' : catches === 1 ? 'bg-yellow-100' : 'bg-red-100'}
+                        `}>
+                            ⚡ {getDifficulty().level}
+                        </span>
+                    </div>
+                )}
             </div>
 
             {/* Game Area */}

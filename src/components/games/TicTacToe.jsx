@@ -13,7 +13,8 @@ const TicTacToe = ({ onWin }) => {
     const [lastMove, setLastMove] = useState(null);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
+        return () => clearTimeout(timer);
     }, []);
 
     useEffect(() => {
@@ -168,7 +169,7 @@ const TicTacToe = ({ onWin }) => {
                     <span>Versuch #{attempts}</span>
                     {gameStatus === 'playing' && (
                         <>
-                            <span className="w-1 h-1 rounded-full bg-gray-300" />
+                            <span className="w-1 h-1 rounded-full bg-gray-300" aria-hidden="true" />
                             <span>{moveCount} Züge</span>
                         </>
                     )}
@@ -215,7 +216,7 @@ const TicTacToe = ({ onWin }) => {
 
             {/* Game Board with 3D perspective */}
             <div className="perspective-1000 w-full max-w-sm mx-auto mb-8">
-                <div className="grid grid-cols-3 gap-3 p-5 bg-gradient-to-br from-white/70 to-white/50 backdrop-blur-sm rounded-3xl shadow-glass border border-white/50">
+                <div className="relative grid grid-cols-3 gap-3 p-5 bg-gradient-to-br from-white/70 to-white/50 backdrop-blur-sm rounded-3xl shadow-glass border border-white/50">
                     {board.map((cell, index) => {
                         const isWinningCell = winningLine.includes(index);
                         const isLastMoveCell = lastMove === index;
@@ -231,7 +232,7 @@ const TicTacToe = ({ onWin }) => {
                                     ${cell === null && isPlayerTurn && gameStatus === 'playing'
                                         ? 'hover:bg-pastel-pink/10 hover:border-pastel-pink/30'
                                         : ''}
-                                    ${isWinningCell ? 'bg-green-100 border-green-300 shadow-glow-pink' : ''}
+                                    ${isWinningCell ? 'bg-green-100 border-green-300 shadow-glow-pink animate-pulse' : ''}
                                     ${isLastMoveCell && cell ? 'animate-pop-in' : ''}
                                     ${(!isPlayerTurn || gameStatus !== 'playing') && cell === null
                                         ? 'opacity-60 cursor-not-allowed' : ''}
@@ -250,6 +251,38 @@ const TicTacToe = ({ onWin }) => {
                             </button>
                         );
                     })}
+
+                    {/* Animated Winning Line Overlay */}
+                    {winningLine.length > 0 && (
+                        <svg
+                            className="absolute inset-0 w-full h-full pointer-events-none z-10"
+                            style={{ padding: '20px' }}
+                        >
+                            <defs>
+                                <linearGradient id="winLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stopColor={gameStatus === 'won' ? '#10B981' : '#EF4444'} />
+                                    <stop offset="50%" stopColor={gameStatus === 'won' ? '#34D399' : '#F87171'} />
+                                    <stop offset="100%" stopColor={gameStatus === 'won' ? '#10B981' : '#EF4444'} />
+                                </linearGradient>
+                            </defs>
+                            <line
+                                x1={`${(winningLine[0] % 3) * 33.33 + 16.66}%`}
+                                y1={`${Math.floor(winningLine[0] / 3) * 33.33 + 16.66}%`}
+                                x2={`${(winningLine[2] % 3) * 33.33 + 16.66}%`}
+                                y2={`${Math.floor(winningLine[2] / 3) * 33.33 + 16.66}%`}
+                                stroke="url(#winLineGradient)"
+                                strokeWidth="6"
+                                strokeLinecap="round"
+                                className="animate-draw-line"
+                                style={{
+                                    strokeDasharray: '300',
+                                    strokeDashoffset: '300',
+                                    animation: 'drawLine 0.5s ease-out forwards',
+                                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+                                }}
+                            />
+                        </svg>
+                    )}
                 </div>
             </div>
 

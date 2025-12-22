@@ -15,6 +15,16 @@ const FakeUpdate = ({ onWin }) => {
     const [currentAction, setCurrentAction] = useState('Verbinde mit Steam-Servern...');
     const [started, setStarted] = useState(false);
     const [filesProgress, setFilesProgress] = useState({ current: 0, total: 2847 });
+    const [fakeError, setFakeError] = useState(null);
+
+    const fakeErrors = [
+        { code: 'ERR_LOVE_OVERFLOW', message: 'Zu viel Liebe erkannt! Buffer overflow...' },
+        { code: 'ERR_HEART_404', message: 'Herz nicht gefunden. Suche läuft...' },
+        { code: 'ERR_CUDDLE_TIMEOUT', message: 'Kuschel-Verbindung abgelaufen!' },
+        { code: 'ERR_FEELINGS_CORRUPT', message: 'Gefühle.dll ist beschädigt!' },
+        { code: 'ERR_KISS_DENIED', message: 'Kuss-Berechtigung verweigert. Retry...' },
+        { code: 'ERR_HUG_STACK', message: 'Umarmungs-Stack ist voll!' },
+    ];
 
     const elapsedRef = useRef(0);
     const progressRef = useRef(0);
@@ -79,7 +89,8 @@ const FakeUpdate = ({ onWin }) => {
     ];
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
+        return () => clearTimeout(timer);
     }, []);
 
     const startUpdate = () => {
@@ -135,8 +146,19 @@ const FakeUpdate = ({ onWin }) => {
                 setDownloadSpeed(funnySpeeds[Math.floor(Math.random() * funnySpeeds.length)]);
             }
 
+            // Random fake error that resolves
+            if (!fakeError && Math.random() < 0.08 && elapsedRef.current > 10 && elapsedRef.current < 50) {
+                const error = fakeErrors[Math.floor(Math.random() * fakeErrors.length)];
+                setFakeError(error);
+                // Error resolves after 2-4 seconds
+                setTimeout(() => {
+                    setFakeError(null);
+                    setCurrentAction('Fehler behoben! Fortfahren...');
+                }, 2000 + Math.random() * 2000);
+            }
+
             // Update action
-            if (Math.random() < 0.15) {
+            if (Math.random() < 0.15 && !fakeError) {
                 const actionIndex = Math.min(
                     Math.floor(progressRef.current / 100 * actions.length),
                     actions.length - 1
@@ -320,13 +342,25 @@ const FakeUpdate = ({ onWin }) => {
                     </div>
 
                     {/* Current action */}
-                    <div className="bg-[#0e1621] rounded p-3 border border-[#2a475e]">
-                        <p className="text-[#8f98a0] text-xs flex items-center gap-2">
-                            {!isComplete && <span className="animate-spin">⚙️</span>}
+                    <div className={`bg-[#0e1621] rounded p-3 border ${fakeError ? 'border-red-500/50' : 'border-[#2a475e]'} transition-colors duration-300`}>
+                        <p className={`text-xs flex items-center gap-2 ${fakeError ? 'text-red-400' : 'text-[#8f98a0]'}`}>
+                            {!isComplete && !fakeError && <span className="animate-spin">⚙️</span>}
                             {isComplete && <span>✅</span>}
-                            {currentAction}
+                            {fakeError && <span className="animate-pulse">⚠️</span>}
+                            {fakeError ? fakeError.message : currentAction}
                         </p>
                     </div>
+
+                    {/* Fake Error Popup */}
+                    {fakeError && (
+                        <div className="mt-3 bg-gradient-to-r from-red-900/80 to-red-800/80 rounded p-3 border border-red-500/50 animate-shake">
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="text-red-400 text-xs font-mono font-bold">{fakeError.code}</span>
+                            </div>
+                            <p className="text-red-300 text-xs">{fakeError.message}</p>
+                            <p className="text-red-400/60 text-xs mt-1 italic">Automatisch beheben...</p>
+                        </div>
+                    )}
                 </div>
             </div>
 

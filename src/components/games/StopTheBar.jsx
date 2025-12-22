@@ -21,7 +21,8 @@ const StopTheBar = ({ onWin, config = {} }) => {
     const targetEnd = targetStart + targetWidth;
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
+        return () => clearTimeout(timer);
     }, []);
 
     useEffect(() => {
@@ -181,9 +182,9 @@ const StopTheBar = ({ onWin, config = {} }) => {
                 <div className="mt-6 animate-slide-up">
                     {won ? (
                         <div className="flex items-center justify-center gap-2 text-green-500">
-                            <SparkleIcon className="w-5 h-5" />
+                            <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                             <p className="text-lg font-bold">Super Reflexe! ⚡</p>
-                            <SparkleIcon className="w-5 h-5" />
+                            <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                         </div>
                     ) : (
                         <button

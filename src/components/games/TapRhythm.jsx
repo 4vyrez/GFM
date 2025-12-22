@@ -19,8 +19,9 @@ const TapRhythm = ({ onWin }) => {
     const gameLoopRef = useRef(null);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         return () => {
+            clearTimeout(timer);
             if (gameLoopRef.current) clearInterval(gameLoopRef.current);
         };
     }, []);
@@ -171,7 +172,7 @@ const TapRhythm = ({ onWin }) => {
             {/* Game area */}
             <div className="relative w-full h-64 bg-gradient-to-br from-gray-900/90 to-gray-800/90 rounded-2xl overflow-hidden">
                 {/* Target ring */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
                     <div className="w-16 h-16 rounded-full border-2 border-white/30 border-dashed" />
                 </div>
 
@@ -238,9 +239,9 @@ const TapRhythm = ({ onWin }) => {
             {/* Win celebration */}
             {won && (
                 <div className="mt-4 flex items-center gap-2 text-green-500 animate-bounce-in">
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     <p className="font-bold">Musik in deinen Fingern! 🎶</p>
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                 </div>
             )}
         </div>

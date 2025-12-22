@@ -303,17 +303,7 @@ export const games = [
     // ============================================
     // === NEW GAMES: META / STREAK ===
     // ============================================
-    {
-        id: "streak-guardian-1",
-        type: "action",
-        name: "Streak Guardian",
-        description: "Beschütze die Flamme! 🔥",
-        difficulty: "medium",
-        estimatedDuration: "20 Sek",
-        component: "StreakGuardian",
-        tags: ["action", "streak", "meta"],
-        dummyPartnerScore: { metric: "health", value: 85 },
-    },
+    // Note: Streak Guardian removed - was not working well
 
     // ============================================
     // === NEW GAMES: CREATIVE ADDITIONS ===

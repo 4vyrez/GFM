@@ -15,8 +15,9 @@ const BubblePop = ({ onWin }) => {
     const colors = ['bg-pink-300', 'bg-purple-300', 'bg-blue-300', 'bg-green-300', 'bg-yellow-300'];
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         generateBubbles();
+        return () => clearTimeout(timer);
     }, []);
 
     const generateBubbles = () => {
@@ -150,9 +151,9 @@ const BubblePop = ({ onWin }) => {
             {/* Success */}
             {won && (
                 <div className="mt-4 flex items-center justify-center gap-2 text-green-500 animate-slide-up">
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     <p className="font-bold">Bubble Therapy abgeschlossen! 🫧</p>
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                 </div>
             )}
         </div>

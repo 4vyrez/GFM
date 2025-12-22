@@ -36,13 +36,21 @@ const Inventory = memo(({ isOpen, onClose, badges = [], tickets = [], onUseTicke
                 onClick={onClose}
             />
 
-            {/* Drawer */}
-            <div className={`
-                fixed right-0 top-0 bottom-0 w-80 max-w-[90vw]
-                bg-white/95 backdrop-blur-xl shadow-2xl z-50
-                transform transition-transform duration-300 ease-out
-                ${isOpen ? 'translate-x-0' : 'translate-x-full'}
-            `}>
+            {/* Drawer with spring physics animation */}
+            <div
+                className={`
+                    fixed right-0 top-0 bottom-0 w-80 max-w-[90vw]
+                    bg-white/95 backdrop-blur-xl z-50
+                    transform origin-right
+                    ${isOpen ? 'translate-x-0 scale-x-100' : 'translate-x-full scale-x-95'}
+                `}
+                style={{
+                    transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease',
+                    boxShadow: isOpen
+                        ? '-8px 0 32px rgba(0, 0, 0, 0.15), -2px 0 8px rgba(0, 0, 0, 0.08)'
+                        : 'none'
+                }}
+            >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
                     <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -61,8 +69,8 @@ const Inventory = memo(({ isOpen, onClose, badges = [], tickets = [], onUseTicke
                     <button
                         onClick={() => setActiveTab('badges')}
                         className={`flex-1 py-3 text-sm font-semibold transition-colors ${activeTab === 'badges'
-                                ? 'text-purple-600 border-b-2 border-purple-600'
-                                : 'text-gray-500 hover:text-gray-700'
+                            ? 'text-purple-600 border-b-2 border-purple-600'
+                            : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
                         🏅 Badges ({badges.length})
@@ -70,8 +78,8 @@ const Inventory = memo(({ isOpen, onClose, badges = [], tickets = [], onUseTicke
                     <button
                         onClick={() => setActiveTab('tickets')}
                         className={`flex-1 py-3 text-sm font-semibold transition-colors ${activeTab === 'tickets'
-                                ? 'text-purple-600 border-b-2 border-purple-600'
-                                : 'text-gray-500 hover:text-gray-700'
+                            ? 'text-purple-600 border-b-2 border-purple-600'
+                            : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
                         🎟️ Gutscheine ({tickets.filter(t => !t.used).length})

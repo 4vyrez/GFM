@@ -14,10 +14,13 @@ const MemoryCards = ({ onWin }) => {
     const [isPerfect, setIsPerfect] = useState(false);
     const [attempts, setAttempts] = useState(1);
     const [isVisible, setIsVisible] = useState(false);
+    const [lastMatchedPair, setLastMatchedPair] = useState(null);
+    const [comboStreak, setComboStreak] = useState(0);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         initializeGame();
+        return () => clearTimeout(timer);
     }, []);
 
     const initializeGame = () => {
@@ -49,6 +52,11 @@ const MemoryCards = ({ onWin }) => {
                 const newMatched = [...matched, first, second];
                 setMatched(newMatched);
                 setFlipped([]);
+                setLastMatchedPair(cards[first].emoji);
+                setComboStreak(prev => prev + 1);
+
+                // Clear match notification after animation
+                setTimeout(() => setLastMatchedPair(null), 800);
 
                 if (newMatched.length === cards.length) {
                     const perfectScore = (moves + 1) === (cards.length / 2);
@@ -65,6 +73,7 @@ const MemoryCards = ({ onWin }) => {
                     }, 1500);
                 }
             } else {
+                setComboStreak(0);
                 setTimeout(() => {
                     setFlipped([]);
                 }, 1000);
@@ -99,6 +108,15 @@ const MemoryCards = ({ onWin }) => {
                 `}>
                     {won ? '🎉 Alle Paare gefunden!' : 'Finde alle Paare! 🃏'}
                 </p>
+
+                {/* Match celebration popup */}
+                {lastMatchedPair && (
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+                        <div className="bg-green-500 text-white px-4 py-2 rounded-full text-lg font-bold animate-bounce-in shadow-lg">
+                            {lastMatchedPair} Match! {comboStreak > 1 ? `x${comboStreak} 🔥` : '✨'}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Cards Grid with 3D perspective */}

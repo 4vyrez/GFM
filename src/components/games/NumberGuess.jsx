@@ -16,8 +16,9 @@ const NumberGuess = ({ onWin }) => {
     const inputRef = useRef(null);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         startNewGame();
+        return () => clearTimeout(timer);
     }, []);
 
     const startNewGame = () => {
@@ -90,6 +91,12 @@ const NumberGuess = ({ onWin }) => {
         setAttempts(prev => prev + 1);
     };
 
+    // Calculate optimal next guess (binary search hint)
+    const getOptimalGuess = () => {
+        const r = getRange();
+        return Math.floor((r.min + r.max) / 2);
+    };
+
     // Calculate range based on guesses
     const getRange = () => {
         if (guesses.length === 0) return { min: 1, max: 100 };
@@ -116,7 +123,7 @@ const NumberGuess = ({ onWin }) => {
             <div className="text-center mb-6">
                 <div className="inline-flex items-center gap-2 badge mb-3">
                     <span>Versuch #{attempts}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                    <span className="w-1 h-1 rounded-full bg-gray-300" aria-hidden="true" />
                     <span>{guesses.length} {guesses.length === 1 ? 'Tipp' : 'Tipps'}</span>
                 </div>
 
@@ -248,17 +255,18 @@ const NumberGuess = ({ onWin }) => {
             {won && (
                 <div className="text-center animate-slide-up">
                     <div className="flex items-center justify-center gap-2 text-green-500 mb-2">
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                         <p className="text-lg font-bold">
                             Gefunden in {guesses.length} {guesses.length === 1 ? 'Versuch' : 'Versuchen'}! 🎯
                         </p>
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     </div>
                     <p className="text-sm text-gray-500 mb-4">
-                        {guesses.length <= 3 && 'Unglaublich! 🌟'}
-                        {guesses.length > 3 && guesses.length <= 7 && 'Super! ✨'}
-                        {guesses.length > 7 && guesses.length <= 10 && 'Gut gemacht! 💪'}
-                        {guesses.length > 10 && 'Geschafft! 🎉'}
+                        {guesses.length <= 3 && '🌟 Unglaublich! Meisterhaft!'}
+                        {guesses.length > 3 && guesses.length <= 5 && '🧠 Perfektes Spiel! Binary Search Pro!'}
+                        {guesses.length > 5 && guesses.length <= 7 && '✨ Optimal gelöst! Super!'}
+                        {guesses.length > 7 && guesses.length <= 10 && '💪 Gut gemacht!'}
+                        {guesses.length > 10 && '🎉 Geschafft!'}
                     </p>
                     <button
                         onClick={resetGame}

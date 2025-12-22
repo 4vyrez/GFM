@@ -8,20 +8,20 @@ const QuizGame = ({ onWin }) => {
     const allQuestions = [
         {
             question: 'Wann haben wir uns das erste Mal getroffen?',
-            answers: ['07.11.2023', '14.11.2023', '21.11.2023', '28.11.2023'],
+            answers: ['11.07.2024', '07.11.2024', '21.07.2024', '28.07.2024'],
             correct: 0,
             emoji: '💑'
         },
         {
-            question: 'Was war unser erstes gemeinsames Essen?',
+            question: 'Was ist mein Lieblingsessen?',
             answers: ['Pizza', 'Sushi', 'Burger', 'Pasta'],
-            correct: 1,
+            correct: 2,
             emoji: '🍽️'
         },
         {
             question: 'Welche Farbe mag ich am liebsten?',
             answers: ['Rosa', 'Blau', 'Grün', 'Lila'],
-            correct: 0,
+            correct: 1,
             emoji: '🎨'
         },
         {
@@ -31,15 +31,15 @@ const QuizGame = ({ onWin }) => {
             emoji: '💕'
         },
         {
-            question: 'Welches Tier mag ich am meisten?',
-            answers: ['Katzen', 'Hunde', 'Hasen', 'Vögel'],
-            correct: 0,
-            emoji: '🐱'
+            question: 'Welches Tier ist mein Lieblingstier?',
+            answers: ['Wolf', 'Orca', 'Löwe', 'Adler'],
+            correct: 1,
+            emoji: '🐾'
         },
         {
-            question: 'Was ist mein Lieblingsfilm-Genre?',
-            answers: ['Horror', 'Komödie', 'Action', 'Romance'],
-            correct: 3,
+            question: 'Was ist meine Lieblingsserie (Reallife)?',
+            answers: ['You', 'Casa de Papel', 'Dark', 'Prison Break'],
+            correct: 0,
             emoji: '🎬'
         },
         {
@@ -51,27 +51,27 @@ const QuizGame = ({ onWin }) => {
         {
             question: 'Was trinke ich am liebsten?',
             answers: ['Kaffee', 'Tee', 'Cola', 'Wasser'],
-            correct: 0,
+            correct: 3,
             emoji: '☕'
         },
         {
             question: 'Wo würde ich am liebsten Urlaub machen?',
-            answers: ['Strand', 'Berge', 'Städtetrip', 'Zuhause mit dir'],
-            correct: 3,
+            answers: ['Tokio', 'Dubai', 'New York', 'Shanghai'],
+            correct: 2,
             emoji: '✈️'
         },
         {
-            question: 'Was ist meine Lieblingsblume?',
-            answers: ['Rosen', 'Tulpen', 'Sonnenblumen', 'Lilien'],
+            question: 'Was ist meine Lieblingsspiel?',
+            answers: ['Minecraft', 'Roblox', 'Valorant', 'Fortnite'],
             correct: 0,
-            emoji: '🌹'
+            emoji: '🎮'
         },
     ];
 
-    // Pick 4-5 random questions for each playthrough
+    // Pick 6 random questions for each playthrough (need 3/6 = 50% to win)
     const [questions] = useState(() => {
         const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
-        return shuffled.slice(0, 5);
+        return shuffled.slice(0, 6);
     });
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -82,9 +82,6 @@ const QuizGame = ({ onWin }) => {
     const [attempts, setAttempts] = useState(1);
     const [isVisible, setIsVisible] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
-    const [hintsUsed, setHintsUsed] = useState(0);
-    const [eliminated, setEliminated] = useState([]);
-    const [lifelineUsed, setLifelineUsed] = useState(false);
 
     useEffect(() => {
         setTimeout(() => setIsVisible(true), 100);
@@ -114,7 +111,8 @@ const QuizGame = ({ onWin }) => {
             } else {
                 setShowResult(true);
                 const finalScore = correctAnswers + (isCorrect ? 1 : 0);
-                if (finalScore >= questions.length - 1) {
+                // Win condition: 50% correct (3 out of 6)
+                if (finalScore >= Math.ceil(questions.length / 2)) {
                     setTimeout(() => {
                         if (onWin) {
                             onWin({
@@ -137,21 +135,8 @@ const QuizGame = ({ onWin }) => {
         setShowResult(false);
         setAttempts(prev => prev + 1);
         setIsTransitioning(false);
-        setEliminated([]);
-        setLifelineUsed(false);
     };
 
-    const use5050 = () => {
-        if (lifelineUsed || selectedAnswer !== null) return;
-
-        const correctIdx = questions[currentQuestion].correct;
-        const wrongIndices = [0, 1, 2, 3].filter(i => i !== correctIdx);
-        // Randomly select 2 wrong answers to eliminate
-        const shuffled = wrongIndices.sort(() => Math.random() - 0.5);
-        setEliminated(shuffled.slice(0, 2));
-        setLifelineUsed(true);
-        setHintsUsed(prev => prev + 1);
-    };
 
     const currentQ = questions[currentQuestion];
     const finalScore = correctAnswers;
@@ -253,15 +238,15 @@ const QuizGame = ({ onWin }) => {
                     </div>
                 </>
             ) : (
-                <div className="text-center animate-fade-in w-full max-w-sm">
+                <div className="text-center animate-fade-in w-full max-w-sm" role="alert" aria-live="polite">
                     <div className="glass-card p-8 mb-6">
                         {/* Result emoji */}
-                        <div className="text-7xl mb-4">
-                            {finalScore >= questions.length - 1 ? '🏆' : finalScore >= 2 ? '💕' : '💪'}
+                        <div className="text-7xl mb-4" aria-hidden="true">
+                            {finalScore >= Math.ceil(questions.length / 2) ? '🏆' : finalScore >= 2 ? '💕' : '💪'}
                         </div>
 
                         <h2 className="text-3xl font-black text-gray-800 mb-2">
-                            {finalScore >= questions.length - 1
+                            {finalScore >= Math.ceil(questions.length / 2)
                                 ? 'Perfekt!'
                                 : finalScore >= 2
                                     ? 'Gut gemacht!'
@@ -286,11 +271,11 @@ const QuizGame = ({ onWin }) => {
                             <span className="font-bold text-pastel-pink">{finalScore}</span> von {questions.length} richtig
                         </p>
 
-                        {finalScore >= questions.length - 1 && (
+                        {finalScore >= Math.ceil(questions.length / 2) && (
                             <div className="flex items-center justify-center gap-2 text-green-500 mt-4">
-                                <SparkleIcon className="w-5 h-5" />
+                                <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                                 <span className="font-bold text-sm">Du kennst mich so gut!</span>
-                                <SparkleIcon className="w-5 h-5" />
+                                <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                             </div>
                         )}
                     </div>

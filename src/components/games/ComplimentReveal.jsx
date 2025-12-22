@@ -32,7 +32,8 @@ const ComplimentReveal = ({ onWin }) => {
     const requiredReveals = 3;
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
+        return () => clearTimeout(timer);
     }, []);
 
     const revealCard = (id) => {
@@ -106,9 +107,17 @@ const ComplimentReveal = ({ onWin }) => {
                         >
                             {isRevealed ? (
                                 <div className="text-center animate-fade-in">
-                                    <span className="text-3xl mb-2 block">{compliment.emoji}</span>
+                                    <span className="text-3xl mb-2 block animate-bounce-in">{compliment.emoji}</span>
                                     <p className="text-xs font-medium text-gray-700 leading-tight">
-                                        {compliment.text}
+                                        {compliment.text.split('').map((char, i) => (
+                                            <span
+                                                key={i}
+                                                className="inline-block animate-fade-in"
+                                                style={{ animationDelay: `${i * 30}ms` }}
+                                            >
+                                                {char === ' ' ? '\u00A0' : char}
+                                            </span>
+                                        ))}
                                     </p>
                                 </div>
                             ) : (
@@ -139,9 +148,17 @@ const ComplimentReveal = ({ onWin }) => {
             >
                 {revealed.includes(compliments[4].id) ? (
                     <div className="text-center animate-fade-in">
-                        <span className="text-2xl mb-1 block">{compliments[4].emoji}</span>
+                        <span className="text-2xl mb-1 block animate-bounce-in">{compliments[4].emoji}</span>
                         <p className="text-xs font-medium text-gray-700">
-                            {compliments[4].text}
+                            {compliments[4].text.split('').map((char, i) => (
+                                <span
+                                    key={i}
+                                    className="inline-block animate-fade-in"
+                                    style={{ animationDelay: `${i * 30}ms` }}
+                                >
+                                    {char === ' ' ? '\u00A0' : char}
+                                </span>
+                            ))}
                         </p>
                     </div>
                 ) : (
@@ -171,9 +188,9 @@ const ComplimentReveal = ({ onWin }) => {
             {/* Success */}
             {won && (
                 <div className="flex items-center justify-center gap-2 text-green-500 animate-slide-up">
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     <p className="font-bold">Du verdienst alle Komplimente! 💕</p>
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                 </div>
             )}
         </div>

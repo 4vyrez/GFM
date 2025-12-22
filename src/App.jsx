@@ -39,8 +39,6 @@ import MemeQuiz from './components/games/MemeQuiz';
 import HistoryQuiz from './components/games/HistoryQuiz';
 import ComplimentReveal from './components/games/ComplimentReveal';
 import BiteMeter from './components/games/BiteMeter';
-// New Games - Meta
-import StreakGuardian from './components/games/StreakGuardian';
 // New Games - Creative Additions
 import LuckySpin from './components/games/LuckySpin';
 import MirrorMatch from './components/games/MirrorMatch';
@@ -56,6 +54,7 @@ import { getSpecialDateForToday } from './data/specials';
 import { photos, messages, getRandomItem, getNextPhoto, getNextMessage } from './data/content';
 import { getGameById, games } from './data/games';
 import { SparkleIcon, FlameIcon, ConfettiIcon } from './components/icons/Icons';
+import EasterEggs, { getRandomLoadingMessage } from './components/EasterEggs';
 import {
   getData,
   saveData,
@@ -155,6 +154,8 @@ function App() {
   const [milestoneStreak, setMilestoneStreak] = useState(0);
   const [showInventory, setShowInventory] = useState(false);
   const [showSpecialDate, setShowSpecialDate] = useState(false);
+  const [konamiUnlocked, setKonamiUnlocked] = useState(false);
+  const [loadingMessage] = useState(() => getRandomLoadingMessage());
 
   // Handle login
   const handleLogin = (code) => {
@@ -165,7 +166,7 @@ function App() {
   // Time-based greeting
   const greeting = useMemo(() => getGreeting(), []);
 
-  // Generate confetti particles - optimized for performance
+  // Generate confetti particles - stable memoization
   const confettiParticles = useMemo(() => {
     const colors = ['#FF6B9D', '#FFD700', '#4FC3F7', '#A855F7', '#FF7F7F', '#BDFCC9', '#FFA500', '#FFB7C5'];
     return Array.from({ length: 50 }, (_, i) => ({
@@ -174,7 +175,7 @@ function App() {
       color: colors[Math.floor(Math.random() * colors.length)],
       left: Math.random() * 100
     }));
-  }, [showSuccessEffect]);
+  }, []); // Empty dependency - regenerate only on mount
 
   useEffect(() => {
     initializeApp();
@@ -288,6 +289,8 @@ function App() {
     setIsTransitioning(true);
     setTimeout(() => {
       setCurrentView(newView);
+      // Scroll to top smoothly on view change
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       setTimeout(() => setIsTransitioning(false), 50);
     }, 150);
   };
@@ -353,7 +356,7 @@ function App() {
             <SparkleIcon className="absolute -top-2 -right-2 w-6 h-6 animate-float" />
           </div>
           <div className="text-xl text-gray-600 font-medium animate-pulse">
-            Wird geladen... ✨
+            {loadingMessage}
           </div>
         </div>
       </div>
@@ -423,8 +426,6 @@ function App() {
     HistoryQuiz,
     ComplimentReveal,
     BiteMeter,
-    // New Games - Meta
-    StreakGuardian,
     // New Games - Creative Additions
     LuckySpin,
     MirrorMatch,
@@ -448,16 +449,25 @@ function App() {
         {/* Tap Hearts - Interactive heart spawner (lightweight, keep everywhere) */}
         <TapHearts />
 
+        {/* Easter Eggs - Konami code, seasonal decorations */}
+        <EasterEggs
+          onKonamiUnlock={() => {
+            setKonamiUnlocked(true);
+            // Could unlock special theme or feature here
+          }}
+        />
+
         {/* Floating Inventory Button - Top Right */}
         <button
           onClick={() => setShowInventory(true)}
+          aria-label="Inventar öffnen - Badges und Gutscheine anzeigen"
           className="fixed top-4 right-4 z-40 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-white/50 flex items-center justify-center text-2xl hover:scale-110 transition-transform"
           title="Inventar öffnen"
         >
           🎒
           {/* Badge count indicator */}
           {(appData.collectedBadges?.length > 0 || appData.collectedTickets?.filter(t => !t.used).length > 0) && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-pink-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-pink-500 text-white text-xs font-bold rounded-full flex items-center justify-center" aria-label="Neue Items">
               {(appData.collectedBadges?.length || 0) + (appData.collectedTickets?.filter(t => !t.used).length || 0)}
             </span>
           )}
@@ -492,7 +502,7 @@ function App() {
 
         {/* Premium Success Overlay - Duolingo Style Celebration */}
         {showSuccessEffect && (
-          <div className="win-overlay animate-fade-in">
+          <div className="win-overlay animate-fade-in" role="alert" aria-live="assertive">
             {/* Confetti particles - more of them! */}
             {confettiParticles.map(particle => (
               <ConfettiParticle key={particle.id} {...particle} />
@@ -590,9 +600,12 @@ function App() {
 
             {/* Premium Navigation Toggle with spring physics */}
             <div className="flex justify-center mb-6">
-              <div className="pill-toggle relative grid grid-cols-3">
+              <div className="pill-toggle relative grid grid-cols-3" role="tablist" aria-label="Hauptnavigation">
                 <button
                   onClick={() => handleViewChange('today')}
+                  role="tab"
+                  aria-selected={currentView === 'today'}
+                  aria-controls="main-content"
                   className={`
                   relative z-10 px-5 py-2.5 rounded-full text-sm font-bold
                   transition-all duration-300 text-center
@@ -603,6 +616,9 @@ function App() {
                 </button>
                 <button
                   onClick={() => handleViewChange('challenge')}
+                  role="tab"
+                  aria-selected={currentView === 'challenge'}
+                  aria-controls="main-content"
                   className={`
                   relative z-10 px-5 py-2.5 rounded-full text-sm font-bold
                   transition-all duration-300 text-center
@@ -613,6 +629,9 @@ function App() {
                 </button>
                 <button
                   onClick={() => handleViewChange('settings')}
+                  role="tab"
+                  aria-selected={currentView === 'settings'}
+                  aria-controls="main-content"
                   className={`
                   relative z-10 px-5 py-2.5 rounded-full text-sm font-bold
                   transition-all duration-300 text-center
@@ -638,9 +657,16 @@ function App() {
             </div>
 
             {/* Main Content Area with smooth transitions */}
-            <div className={`
+            <div
+              id="main-content"
+              role="tabpanel"
+              aria-label={`${currentView === 'today' ? 'Heute' : currentView === 'challenge' ? 'Spiel' : 'Styles'} Bereich`}
+              className={`
             transition-all duration-300 ease-apple
-            ${isTransitioning ? 'opacity-0 scale-98 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}
+            ${isTransitioning
+                  ? 'opacity-0 scale-[0.98] translate-y-3 blur-sm'
+                  : 'opacity-100 scale-100 translate-y-0 blur-0'
+                }
           `}>
 
               {/* Persistent Streak Display */}

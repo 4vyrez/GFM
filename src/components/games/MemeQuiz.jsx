@@ -186,6 +186,33 @@ const MemeQuiz = ({ onWin }) => {
 
     if (gameComplete) {
         const finalScore = score;
+
+        // Generate shareable result
+        const generateShareText = () => {
+            const emojis = gameQuestions.map((q, i) => {
+                // Check if answered correctly by comparing position
+                return i < score ? '🎮' : '❌';
+            }).join('');
+            return `GFM Gamer Quiz\n${emojis}\n${finalScore}/${gameQuestions.length} richtig 🎯`;
+        };
+
+        const handleShare = async () => {
+            const text = generateShareText();
+            try {
+                await navigator.clipboard.writeText(text);
+                // Show feedback
+                const btn = document.getElementById('share-btn');
+                if (btn) {
+                    btn.textContent = '✅ Kopiert!';
+                    setTimeout(() => {
+                        btn.textContent = '📤 Teilen';
+                    }, 2000);
+                }
+            } catch (err) {
+                console.log('Could not copy to clipboard');
+            }
+        };
+
         return (
             <div
                 className={`
@@ -207,19 +234,37 @@ const MemeQuiz = ({ onWin }) => {
                 </p>
 
                 {finalScore >= requiredScore ? (
-                    <div className="flex items-center gap-2 text-green-500">
-                        <SparkleIcon className="w-5 h-5" />
-                        <p className="font-bold">Du kennst deine Memes! GG! 🎮</p>
-                        <SparkleIcon className="w-5 h-5" />
-                    </div>
+                    <>
+                        <div className="flex items-center gap-2 text-green-500 mb-4">
+                            <SparkleIcon className="w-5 h-5" />
+                            <p className="font-bold">Du kennst deine Memes! GG! 🎮</p>
+                            <SparkleIcon className="w-5 h-5" />
+                        </div>
+                        <button
+                            id="share-btn"
+                            onClick={handleShare}
+                            className="px-6 py-2 rounded-xl bg-gradient-to-r from-pastel-lavender to-pastel-pink text-white font-medium hover:scale-105 transition-all duration-300 shadow-md"
+                        >
+                            📤 Teilen
+                        </button>
+                    </>
                 ) : (
                     <>
                         <p className="text-sm text-gray-400 mb-4">
                             Du brauchst mindestens {requiredScore} richtige Antworten
                         </p>
-                        <button onClick={resetGame} className="btn-secondary">
-                            Nochmal versuchen 🔄
-                        </button>
+                        <div className="flex gap-3">
+                            <button onClick={resetGame} className="btn-secondary">
+                                Nochmal versuchen 🔄
+                            </button>
+                            <button
+                                id="share-btn"
+                                onClick={handleShare}
+                                className="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 transition-all duration-300"
+                            >
+                                📤 Teilen
+                            </button>
+                        </div>
                     </>
                 )}
             </div>

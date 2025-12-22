@@ -11,11 +11,16 @@ const StreakDisplay = ({ streak, streakFreezes = 0, lastUpdate, nextAvailableDat
 
     // Animate when streak changes
     useEffect(() => {
+        let animationTimer;
         if (prevStreak.current !== streak) {
             setIsAnimating(true);
-            setTimeout(() => setIsAnimating(false), 600);
+            // Cascade animation - bounce in, then subtle pulse
+            animationTimer = setTimeout(() => setIsAnimating(false), 800);
             prevStreak.current = streak;
         }
+        return () => {
+            if (animationTimer) clearTimeout(animationTimer);
+        };
     }, [streak]);
 
     useEffect(() => {
@@ -62,7 +67,10 @@ const StreakDisplay = ({ streak, streakFreezes = 0, lastUpdate, nextAvailableDat
             transition-all duration-500 ease-apple
             ${isCompact ? 'mb-4 p-4' : 'mb-8 p-6'}
             ${isUpdatedToday ? 'shadow-glow-orange' : 'shadow-glass'}
-        `}>
+        `}
+            role="region"
+            aria-label="Streak Status"
+        >
             {/* Subtle background accent when active */}
             {isUpdatedToday && (
                 <div className="absolute inset-0 -z-10 overflow-hidden rounded-3xl">
@@ -85,6 +93,7 @@ const StreakDisplay = ({ streak, streakFreezes = 0, lastUpdate, nextAvailableDat
                                 transition-all duration-300 transform
                                 ${i < streakFreezes ? 'animate-bounce-in opacity-100 scale-100' : 'opacity-30 scale-90'}
                             `}
+                            aria-label={i < streakFreezes ? 'Streak Freeze verfügbar' : 'Streak Freeze nicht verfügbar'}
                         >
                             <StreakFreezeIcon
                                 className={`
@@ -149,15 +158,31 @@ const StreakDisplay = ({ streak, streakFreezes = 0, lastUpdate, nextAvailableDat
                     transition-all duration-500 ease-apple
                     ${isCompact ? 'flex items-center gap-3' : 'flex flex-col items-center text-center'}
                 `}>
-                    {/* Streak Count with animation */}
-                    <span className={`
-                        font-black tracking-tight transition-all duration-500
-                        ${isCompact ? 'text-4xl' : 'text-8xl'}
-                        ${isUpdatedToday ? 'text-gradient-warm' : 'text-gray-300'}
-                        ${isAnimating ? 'animate-bounce-in' : ''}
-                    `}>
-                        {streak}
-                    </span>
+                    {/* Streak Count with improved animation */}
+                    <div className="relative">
+                        {/* Glow effect behind number when animating */}
+                        {isAnimating && (
+                            <div
+                                className="absolute inset-0 blur-xl opacity-50"
+                                style={{
+                                    background: 'radial-gradient(circle, rgba(251,146,60,0.6) 0%, transparent 70%)'
+                                }}
+                                aria-hidden="true"
+                            />
+                        )}
+                        <span className={`
+                            font-black tracking-tight transition-all duration-500 relative
+                            ${isCompact ? 'text-4xl' : 'text-8xl'}
+                            ${isUpdatedToday ? 'text-gradient-warm' : 'text-gray-300'}
+                            ${isAnimating ? 'animate-streak-counter' : ''}
+                        `}
+                            role="status"
+                            aria-live="polite"
+                            aria-label={`${streak} Tage Streak`}
+                        >
+                            {streak}
+                        </span>
+                    </div>
 
                     {/* Label - only shown in full mode */}
                     <span className={`
@@ -185,8 +210,8 @@ const StreakDisplay = ({ streak, streakFreezes = 0, lastUpdate, nextAvailableDat
                         text-gray-500
                         shadow-sm
                     `}>
-                        {timeLeft === 'Bereit!' && <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />}
-                        {timeLeft}
+                        {timeLeft === 'Bereit!' && <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" aria-hidden="true" />}
+                        <span aria-label="Nächste Verfügbarkeit">{timeLeft}</span>
                     </span>
                 </div>
             </div>

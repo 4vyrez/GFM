@@ -91,12 +91,19 @@ const HistoryQuiz = ({ onWin }) => {
             emoji: '📖',
             hint: 'Mainz',
         },
+        {
+            question: 'Wer war Julius Cäsar?',
+            answers: ['Römischer Feldherr & Diktator', 'Griechischer Philosoph', 'Ägyptischer Pharao', 'Germanischer Stammesführer'],
+            correct: 0,
+            emoji: '🏛️',
+            hint: 'Et tu, Brute?',
+        },
     ];
 
-    // Pick 5 random questions
+    // Pick 6 random questions (need more than 50% = 3/6 to pass)
     const [gameQuestions] = useState(() => {
         const shuffled = [...questions].sort(() => Math.random() - 0.5);
-        return shuffled.slice(0, 5);
+        return shuffled.slice(0, 6);
     });
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -134,7 +141,8 @@ const HistoryQuiz = ({ onWin }) => {
             } else {
                 setShowResult(true);
                 const finalScore = correctAnswers + (isCorrect ? 1 : 0);
-                if (finalScore >= gameQuestions.length - 1) {
+                // Pass if more than 50% correct (at least 4 out of 6)
+                if (finalScore >= Math.floor(gameQuestions.length / 2) + 1) {
                     setTimeout(() => {
                         if (onWin) {
                             onWin({
@@ -271,11 +279,11 @@ const HistoryQuiz = ({ onWin }) => {
                     <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-8 mb-6 shadow-md">
                         {/* Result emoji */}
                         <div className="text-7xl mb-4">
-                            {finalScore >= gameQuestions.length - 1 ? '🏆' : finalScore >= 3 ? '📚' : '📖'}
+                            {finalScore >= Math.floor(gameQuestions.length / 2) + 1 ? '🏆' : finalScore >= 3 ? '📚' : '📖'}
                         </div>
 
                         <h2 className="text-3xl font-black text-gray-800 mb-2">
-                            {finalScore >= gameQuestions.length - 1
+                            {finalScore >= Math.floor(gameQuestions.length / 2) + 1
                                 ? 'Historiker!'
                                 : finalScore >= 3
                                     ? 'Gut informiert!'
@@ -304,7 +312,7 @@ const HistoryQuiz = ({ onWin }) => {
                             <span className="font-bold text-amber-600">{finalScore}</span> von {gameQuestions.length} richtig
                         </p>
 
-                        {finalScore >= gameQuestions.length - 1 && (
+                        {finalScore >= Math.floor(gameQuestions.length / 2) + 1 && (
                             <div className="flex items-center justify-center gap-2 text-green-500 mt-4">
                                 <SparkleIcon className="w-5 h-5" />
                                 <span className="font-bold text-sm">Geschichte gemeistert!</span>

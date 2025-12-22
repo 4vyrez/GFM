@@ -47,10 +47,12 @@ const CaptchaCats = ({ onWin }) => {
     const [attempts, setAttempts] = useState(1);
     const [isVisible, setIsVisible] = useState(false);
     const [gridItems, setGridItems] = useState([]);
+    const [loadedImages, setLoadedImages] = useState(new Set());
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         generateGrid();
+        return () => clearTimeout(timer);
     }, [phase]);
 
     const generateGrid = () => {
@@ -106,6 +108,7 @@ const CaptchaCats = ({ onWin }) => {
         items = items.sort(() => Math.random() - 0.5).map((item, idx) => ({ ...item, id: idx }));
         setGridItems(items);
         setSelected([]);
+        setLoadedImages(new Set()); // Reset loaded images when grid regenerates
     };
 
     const targetCount = gridItems.filter(item => item.isTarget).length;
@@ -217,12 +220,19 @@ const CaptchaCats = ({ onWin }) => {
                                 `}
                             >
                                 {item.image ? (
-                                    <img
-                                        src={item.image}
-                                        alt={item.name}
-                                        className="w-full h-full object-cover"
-                                        loading="lazy"
-                                    />
+                                    <>
+                                        {/* Loading shimmer */}
+                                        {!loadedImages.has(item.id) && (
+                                            <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-loading-shimmer" />
+                                        )}
+                                        <img
+                                            src={item.image}
+                                            alt={item.name}
+                                            className={`w-full h-full object-cover transition-opacity duration-300 ${loadedImages.has(item.id) ? 'opacity-100' : 'opacity-0'}`}
+                                            loading="lazy"
+                                            onLoad={() => setLoadedImages(prev => new Set(prev).add(item.id))}
+                                        />
+                                    </>
                                 ) : (
                                     <span className="text-4xl">{item.emoji}</span>
                                 )}
@@ -273,9 +283,9 @@ const CaptchaCats = ({ onWin }) => {
             {/* Success Animation */}
             {verified && (
                 <div className="mt-4 flex items-center justify-center gap-2 text-green-500 animate-slide-up">
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     <p className="text-lg font-bold">Katzen-Expert*in! 🐱💕</p>
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                 </div>
             )}
 

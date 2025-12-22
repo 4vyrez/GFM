@@ -15,13 +15,12 @@ const StreakGuardian = ({ onWin }) => {
     const [won, setWon] = useState(false);
     const [lost, setLost] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
-    const [dropsBlocked, setDropsBlocked] = useState(0);
     const gameLoopRef = useRef(null);
-    const dropIdRef = useRef(0);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         return () => {
+            clearTimeout(timer);
             if (gameLoopRef.current) clearInterval(gameLoopRef.current);
         };
     }, []);
@@ -31,7 +30,6 @@ const StreakGuardian = ({ onWin }) => {
         setTimeLeft(15);
         setFlameHealth(100);
         setShieldEnergy(100);
-        setDropsBlocked(0);
         setDrops([]);
         setWon(false);
         setLost(false);

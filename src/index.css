@@ -504,3 +504,469 @@
 .animate-float-particle {
   animation: float-particle 3s ease-in-out infinite;
 }
+
+/* Shake Animation for errors/emphasis */
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Intense shake for maximum danger levels */
+@keyframes shake-intense {
+
+  0%,
+  100% {
+    transform: translateX(0) rotate(0);
+  }
+
+  10%,
+  50%,
+  90% {
+    transform: translateX(-6px) rotate(-1deg);
+  }
+
+  30%,
+  70% {
+    transform: translateX(6px) rotate(1deg);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(-4px) rotate(0.5deg);
+  }
+}
+
+.animate-shake-intense {
+  animation: shake-intense 0.4s ease-in-out;
+}
+
+/* Fade in animation for hints */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Streak counter animation - bounce with scale and subtle glow */
+@keyframes streak-counter {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+
+  30% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(0.95);
+  }
+
+  70% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-streak-counter {
+  animation: streak-counter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Loading shimmer effect */
+@keyframes loading-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-loading-shimmer {
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0) 100%);
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s ease-in-out infinite;
+}
+
+/* Click ripple animation */
+@keyframes click-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.animate-click-ripple {
+  animation: click-ripple 0.6s ease-out forwards;
+}
+
+/* Subtle wiggle for attention */
+@keyframes attention-wiggle {
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-3deg);
+  }
+
+  75% {
+    transform: rotate(3deg);
+  }
+}
+
+.animate-attention-wiggle {
+  animation: attention-wiggle 0.3s ease-in-out;
+}
+
+/* Counter increment animation */
+@keyframes count-up {
+  0% {
+    transform: translateY(50%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-count-up {
+  animation: count-up 0.3s ease-out;
+}
+
+/* Draw line animation for winning line in TicTacToe */
+@keyframes drawLine {
+  0% {
+    stroke-dashoffset: 300;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-draw-line {
+  animation: drawLine 0.5s ease-out forwards;
+}
+
+/* Scale in and out for countdown numbers */
+@keyframes scaleInOut {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Success Checkmark Animation */
+@keyframes successCheckmark {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.animate-checkmark {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: successCheckmark 0.6s ease-out forwards;
+}
+
+/* Micro-interaction button press effect */
+@keyframes buttonPress {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(0.95);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-button-press {
+  animation: buttonPress 0.15s ease-out;
+}
+
+/* Reduced Motion Support - Accessibility */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .animate-float,
+  .animate-float-slow,
+  .animate-pulse-glow,
+  .animate-heartbeat,
+  .animate-bounce-subtle,
+  .animate-spin-slow,
+  .ken-burns,
+  .animate-particle-float,
+  .animate-float-particle {
+    animation: none !important;
+  }
+
+  body {
+    animation: none !important;
+    background-size: 100% 100% !important;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+  outline: 2px solid #A855F7;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Skip focus styles for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Glass morphism depth layers - for stacked UI elements */
+.glass-layer-1 {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.glass-layer-2 {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.glass-layer-3 {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.1),
+    inset 0 2px 0 rgba(255, 255, 255, 1);
+}
+
+/* Card entrance stagger animation */
+@keyframes card-entrance {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-card-entrance {
+  animation: card-entrance 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  opacity: 0;
+}
+
+/* Stagger delays for card entrance */
+.card-stagger-1 {
+  animation-delay: 0.05s;
+}
+
+.card-stagger-2 {
+  animation-delay: 0.1s;
+}
+
+.card-stagger-3 {
+  animation-delay: 0.15s;
+}
+
+.card-stagger-4 {
+  animation-delay: 0.2s;
+}
+
+.card-stagger-5 {
+  animation-delay: 0.25s;
+}
+
+.card-stagger-6 {
+  animation-delay: 0.3s;
+}
+
+/* Flame icon flicker animation - more realistic */
+@keyframes flame-flicker {
+
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+
+  10% {
+    transform: scale(1.02) rotate(0.5deg);
+    opacity: 0.95;
+  }
+
+  20% {
+    transform: scale(0.98) rotate(-0.5deg);
+    opacity: 1;
+  }
+
+  30% {
+    transform: scale(1.03) rotate(0.3deg);
+    opacity: 0.97;
+  }
+
+  40% {
+    transform: scale(0.99) rotate(-0.3deg);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.01) rotate(0.4deg);
+    opacity: 0.98;
+  }
+
+  60% {
+    transform: scale(1) rotate(-0.4deg);
+    opacity: 1;
+  }
+
+  70% {
+    transform: scale(1.02) rotate(0.2deg);
+    opacity: 0.96;
+  }
+
+  80% {
+    transform: scale(0.99) rotate(-0.2deg);
+    opacity: 0.99;
+  }
+
+  90% {
+    transform: scale(1.01) rotate(0.1deg);
+    opacity: 0.97;
+  }
+}
+
+.animate-flame-flicker {
+  animation: flame-flicker 0.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 120, 50, 0.6));
+}
+
+/* Improved pill toggle spring physics */
+.pill-toggle-spring {
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* Countdown pulse animation - improved rhythm */
+@keyframes countdown-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  25% {
+    transform: scale(1.08);
+    opacity: 0.9;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  75% {
+    transform: scale(1.04);
+    opacity: 0.95;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-countdown-pulse {
+  animation: countdown-pulse 1s ease-in-out infinite;
+}

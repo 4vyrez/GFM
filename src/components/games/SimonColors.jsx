@@ -23,11 +23,21 @@ const SimonColors = ({ onWin, config = {} }) => {
     const [attempts, setAttempts] = useState(1);
     const [isVisible, setIsVisible] = useState(false);
     const [isPracticeMode, setIsPracticeMode] = useState(false);
+    const [showPatternHint, setShowPatternHint] = useState(false);
     const timeoutRef = useRef(null);
 
+    // Color classes for pattern hint dots
+    const patternDotColors = [
+        'bg-pink-400',   // Rosa
+        'bg-purple-400', // Lila
+        'bg-green-400',  // Mint
+        'bg-blue-400',   // Blau
+    ];
+
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         return () => {
+            clearTimeout(timer);
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
     }, []);
@@ -65,6 +75,10 @@ const SimonColors = ({ onWin, config = {} }) => {
 
         setIsShowingSequence(false);
         setGamePhase('playing');
+        // Show pattern hint after sequence is shown
+        setShowPatternHint(true);
+        // Hide hint after a few seconds
+        setTimeout(() => setShowPatternHint(false), 3000);
     };
 
     const handleColorClick = (colorId) => {
@@ -137,7 +151,7 @@ const SimonColors = ({ onWin, config = {} }) => {
             <div className="text-center mb-6 w-full">
                 <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-xs px-4 py-1.5 rounded-full text-xs font-bold text-gray-400 mb-3 shadow-sm border border-white/50">
                     <span>Versuch #{attempts}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                    <span className="w-1 h-1 rounded-full bg-gray-300" aria-hidden="true" />
                     <span>{sequenceLength} Farben</span>
                 </div>
 
@@ -171,10 +185,28 @@ const SimonColors = ({ onWin, config = {} }) => {
                 ))}
             </div>
 
+            {/* Pattern Hint - shows colored dots for the sequence */}
+            {gamePhase === 'playing' && showPatternHint && (
+                <div className="flex gap-1.5 mb-4 p-2 bg-white/50 rounded-full shadow-sm border border-white/50 animate-fade-in">
+                    <span className="text-xs text-gray-400 mr-1">💡</span>
+                    {sequence.map((colorId, index) => (
+                        <div
+                            key={index}
+                            className={`
+                                w-3 h-3 rounded-full transition-all duration-500
+                                ${patternDotColors[colorId]}
+                                opacity-70
+                            `}
+                            style={{ animationDelay: `${index * 100}ms` }}
+                        />
+                    ))}
+                </div>
+            )}
+
             {/* Progress Dots */}
             {gamePhase === 'playing' && (
                 <div className="flex gap-2 mb-6">
-                    {sequence.map((_, index) => (
+                    {sequence.map((colorId, index) => (
                         <div
                             key={index}
                             className={`
@@ -210,9 +242,9 @@ const SimonColors = ({ onWin, config = {} }) => {
 
             {gamePhase === 'won' && (
                 <div className="flex items-center justify-center gap-2 text-green-500 animate-slide-up">
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     <p className="text-lg font-bold">Super Gedächtnis! 🧠</p>
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                 </div>
             )}
 

@@ -1,14 +1,49 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 /**
  * Floating Particles Background Component
  * Adds subtle floating particle effect to game backgrounds
+ * 
+ * @param {string} density - 'low' | 'medium' | 'high' | number (default: 'medium')
+ * @param {string} className - Additional CSS classes
  */
-const FloatingParticles = ({ count = 15, className = '' }) => {
+
+// Density presets
+const DENSITY_PRESETS = {
+    low: 8,
+    medium: 15,
+    high: 25,
+};
+
+const FloatingParticles = ({ density = 'medium', count, className = '' }) => {
     const [particles, setParticles] = useState([]);
+    const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+    // Determine particle count from density prop or count override
+    const particleCount = useMemo(() => {
+        if (count !== undefined) return count;
+        if (typeof density === 'number') return density;
+        return DENSITY_PRESETS[density] || DENSITY_PRESETS.medium;
+    }, [density, count]);
+
+    // Check for reduced motion preference
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        setPrefersReducedMotion(mediaQuery.matches);
+
+        const handleChange = (e) => setPrefersReducedMotion(e.matches);
+        mediaQuery.addEventListener('change', handleChange);
+        return () => mediaQuery.removeEventListener('change', handleChange);
+    }, []);
 
     useEffect(() => {
-        const newParticles = Array.from({ length: count }, (_, i) => ({
+        // Skip particles if user prefers reduced motion
+        if (prefersReducedMotion) {
+            setParticles([]);
+            return;
+        }
+
+        const newParticles = Array.from({ length: particleCount }, (_, i) => ({
             id: i,
             x: Math.random() * 100,
             y: Math.random() * 100,
@@ -18,7 +53,10 @@ const FloatingParticles = ({ count = 15, className = '' }) => {
             opacity: 0.1 + Math.random() * 0.3,
         }));
         setParticles(newParticles);
-    }, [count]);
+    }, [particleCount, prefersReducedMotion]);
+
+    // Don't render anything if reduced motion is preferred
+    if (prefersReducedMotion || particles.length === 0) return null;
 
     return (
         <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>

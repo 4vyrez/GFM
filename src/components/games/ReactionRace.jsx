@@ -12,12 +12,14 @@ const ReactionRace = ({ onWin }) => {
     const [bestTime, setBestTime] = useState(null);
     const [isVisible, setIsVisible] = useState(false);
     const [ripples, setRipples] = useState([]);
+    const [countdown, setCountdown] = useState(null);
     const buttonRef = useRef(null);
     const timeoutRef = useRef(null);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         return () => {
+            clearTimeout(timer);
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
     }, []);
@@ -36,14 +38,24 @@ const ReactionRace = ({ onWin }) => {
     };
 
     const startGame = () => {
-        setGameState('waiting');
+        // Start with countdown
+        setCountdown(3);
         setReactionTime(null);
+        setGameState('countdown');
 
-        const delay = 2000 + Math.random() * 3000;
-        timeoutRef.current = setTimeout(() => {
-            setGameState('go');
-            setStartTime(Date.now());
-        }, delay);
+        // Countdown sequence
+        setTimeout(() => setCountdown(2), 600);
+        setTimeout(() => setCountdown(1), 1200);
+        setTimeout(() => {
+            setCountdown(null);
+            setGameState('waiting');
+
+            const delay = 2000 + Math.random() * 3000;
+            timeoutRef.current = setTimeout(() => {
+                setGameState('go');
+                setStartTime(Date.now());
+            }, delay);
+        }, 1800);
     };
 
     const handleClick = (e) => {
@@ -87,6 +99,7 @@ const ReactionRace = ({ onWin }) => {
     const getButtonStyle = () => {
         const styles = {
             ready: 'bg-gradient-to-br from-pastel-blue via-pastel-lavender to-pastel-blue',
+            countdown: 'bg-gradient-to-br from-pastel-lavender via-purple-200 to-pastel-lavender',
             waiting: 'bg-gradient-to-br from-pastel-peach via-orange-200 to-pastel-peach animate-pulse',
             go: 'bg-gradient-to-br from-green-400 via-green-300 to-green-400 shadow-glow-pink',
             'too-early': 'bg-gradient-to-br from-red-400 via-red-300 to-red-400',
@@ -99,6 +112,7 @@ const ReactionRace = ({ onWin }) => {
 
     const getMessage = () => {
         if (gameState === 'ready') return 'Bereit? Klick zum Starten!';
+        if (gameState === 'countdown') return 'Los geht\'s...';
         if (gameState === 'waiting') return 'Warte auf Grün...';
         if (gameState === 'go') return 'JETZT!';
         if (gameState === 'too-early') return 'Zu früh! 😅';
@@ -147,14 +161,14 @@ const ReactionRace = ({ onWin }) => {
                 {/* Pulsing ring when waiting */}
                 {gameState === 'waiting' && (
                     <>
-                        <div className="absolute inset-0 rounded-full bg-pastel-peach/50 animate-ping" style={{ animationDuration: '1.5s' }} />
-                        <div className="absolute -inset-4 rounded-full border-4 border-pastel-peach/30 animate-pulse" />
+                        <div className="absolute inset-0 rounded-full bg-pastel-peach/50 animate-ping" style={{ animationDuration: '1.5s' }} aria-hidden="true" />
+                        <div className="absolute -inset-4 rounded-full border-4 border-pastel-peach/30 animate-pulse" aria-hidden="true" />
                     </>
                 )}
 
                 {/* Glow when ready to click */}
                 {gameState === 'go' && (
-                    <div className="absolute -inset-4 rounded-full bg-green-400/40 blur-xl animate-pulse-glow" />
+                    <div className="absolute -inset-4 rounded-full bg-green-400/40 blur-xl animate-pulse-glow" aria-hidden="true" />
                 )}
 
                 <button
@@ -194,6 +208,17 @@ const ReactionRace = ({ onWin }) => {
                     <div className="relative z-10">
                         {gameState === 'ready' && (
                             <span className="text-5xl animate-bounce-subtle">▶️</span>
+                        )}
+                        {gameState === 'countdown' && countdown && (
+                            <span
+                                key={countdown}
+                                className="text-7xl font-black animate-scale-in"
+                                style={{
+                                    animation: 'scaleInOut 0.5s ease-out',
+                                }}
+                            >
+                                {countdown}
+                            </span>
                         )}
                         {gameState === 'waiting' && (
                             <span className="text-5xl">⏳</span>

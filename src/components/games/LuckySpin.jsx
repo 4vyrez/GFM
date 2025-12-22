@@ -12,6 +12,7 @@ const LuckySpin = ({ onWin }) => {
     const [won, setWon] = useState(false);
     const [prize, setPrize] = useState(null);
     const [attempts, setAttempts] = useState(0);
+    const [showConfetti, setShowConfetti] = useState(false);
 
     const segments = [
         { label: '💋 Kuss', color: 'from-pink-400 to-pink-500', prize: 'Ein Kuss!' },
@@ -27,7 +28,8 @@ const LuckySpin = ({ onWin }) => {
     const segmentAngle = 360 / segments.length;
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
+        return () => clearTimeout(timer);
     }, []);
 
     const spin = () => {
@@ -51,7 +53,11 @@ const LuckySpin = ({ onWin }) => {
 
             setPrize(selectedPrize);
             setWon(true);
+            setShowConfetti(true);
             setIsSpinning(false);
+
+            // Hide confetti after animation
+            setTimeout(() => setShowConfetti(false), 3000);
 
             setTimeout(() => {
                 if (onWin) {
@@ -77,11 +83,30 @@ const LuckySpin = ({ onWin }) => {
             <div className="text-center mb-4 w-full">
                 <p className={`
                     text-xl font-bold transition-all duration-300
-                    ${won ? 'text-green-500' : 'text-gray-700'}
+                    ${won ? 'text-green-500 animate-pulse' : 'text-gray-700'}
                 `}>
                     {won ? '🎉 Gewonnen!' : 'Dreh das Glücksrad! 🎡'}
                 </p>
             </div>
+
+            {/* Confetti burst */}
+            {showConfetti && (
+                <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden" aria-hidden="true">
+                    {[...Array(30)].map((_, i) => (
+                        <div
+                            key={i}
+                            className="absolute w-3 h-3 rounded-sm animate-confetti"
+                            style={{
+                                left: `${Math.random() * 100}%`,
+                                top: '-20px',
+                                backgroundColor: ['#FFD700', '#FF6B9D', '#A855F7', '#4FC3F7', '#BDFCC9', '#FFA500'][i % 6],
+                                animationDelay: `${Math.random() * 0.5}s`,
+                                animationDuration: `${1.5 + Math.random()}s`
+                            }}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* Wheel container */}
             <div className="relative mb-6">
@@ -124,10 +149,20 @@ const LuckySpin = ({ onWin }) => {
                     ))}
 
                     {/* Center circle */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-2xl">
-                        🎰
+                    <div className={`
+                        absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+                        w-12 h-12 rounded-full bg-white shadow-lg 
+                        flex items-center justify-center text-2xl
+                        ${won ? 'ring-4 ring-yellow-400 ring-opacity-75 animate-pulse' : ''}
+                    `}>
+                        {won ? '🎊' : '🎰'}
                     </div>
                 </div>
+
+                {/* Winner glow effect */}
+                {won && (
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400/20 via-transparent to-yellow-400/20 animate-pulse" />
+                )}
             </div>
 
             {/* Prize display */}
@@ -159,9 +194,9 @@ const LuckySpin = ({ onWin }) => {
             {/* Win message */}
             {won && (
                 <div className="flex items-center gap-2 text-green-500 animate-bounce-in">
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     <p className="font-bold">Glückspilz! 🍀</p>
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                 </div>
             )}
         </div>

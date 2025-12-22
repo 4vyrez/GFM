@@ -17,8 +17,9 @@ const MirrorMatch = ({ onWin }) => {
     const emojiPairs = ['💕', '💖', '🌸', '✨', '🦋', '🌈', '🌺', '💫'];
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         initGame();
+        return () => clearTimeout(timer);
     }, []);
 
     const initGame = () => {
@@ -151,9 +152,9 @@ const MirrorMatch = ({ onWin }) => {
             {/* Win celebration */}
             {won && (
                 <div className="mt-6 flex items-center gap-2 text-green-500 animate-bounce-in">
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     <p className="font-bold">Gedächtnisprofi! 🧠</p>
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                 </div>
             )}
 

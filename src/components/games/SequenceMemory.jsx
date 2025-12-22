@@ -19,9 +19,11 @@ const SequenceMemory = ({ onWin, config = {} }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [startTime, setStartTime] = useState(null);
     const [completionTime, setCompletionTime] = useState(null);
+    const [isShowingSequence, setIsShowingSequence] = useState(false);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
+        return () => clearTimeout(timer);
     }, []);
 
     const generateSequence = () => {
@@ -126,7 +128,7 @@ const SequenceMemory = ({ onWin, config = {} }) => {
             <div className="text-center mb-6 w-full">
                 <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-xs px-4 py-1.5 rounded-full text-xs font-bold text-gray-400 mb-3 shadow-sm border border-white/50">
                     <span>Versuch #{attempts}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                    <span className="w-1 h-1 rounded-full bg-gray-300" aria-hidden="true" />
                     <span>{sequenceLength} Emojis</span>
                 </div>
 
@@ -220,9 +222,9 @@ const SequenceMemory = ({ onWin, config = {} }) => {
 
             {gamePhase === 'won' && (
                 <div className="flex items-center justify-center gap-2 text-green-500 animate-slide-up">
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     <p className="text-lg font-bold">Elefantengedächtnis! 🐘</p>
-                    <SparkleIcon className="w-5 h-5" />
+                    <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                 </div>
             )}
 

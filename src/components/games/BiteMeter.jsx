@@ -9,10 +9,28 @@ const BiteMeter = ({ onWin }) => {
     const [level, setLevel] = useState(50);
     const [confirmed, setConfirmed] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
+    const [isShaking, setIsShaking] = useState(false);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
+        return () => clearTimeout(timer);
     }, []);
+
+    // Trigger shake animation at dangerous levels
+    useEffect(() => {
+        if (level >= 70) {
+            setIsShaking(true);
+            const timer = setTimeout(() => setIsShaking(false), 300);
+            return () => clearTimeout(timer);
+        }
+    }, [level]);
+
+    // Get shake intensity based on level
+    const getShakeClass = () => {
+        if (level < 70 || confirmed) return '';
+        if (level < 85) return 'animate-shake';
+        return 'animate-shake-intense';
+    };
 
     const handleConfirm = () => {
         setConfirmed(true);
@@ -68,11 +86,12 @@ const BiteMeter = ({ onWin }) => {
             {!confirmed ? (
                 <>
                     {/* Level Display */}
-                    <div className="text-center mb-6">
+                    <div className={`text-center mb-6 ${isShaking ? getShakeClass() : ''}`}>
                         <div className={`
                             text-6xl font-black bg-gradient-to-r ${getGradient()}
                             bg-clip-text text-transparent
                             transition-all duration-300
+                            ${level >= 85 ? 'scale-110' : ''}
                         `}>
                             {level}
                         </div>
@@ -80,7 +99,7 @@ const BiteMeter = ({ onWin }) => {
                     </div>
 
                     {/* Emoji Indicator */}
-                    <div className="text-5xl mb-6 transition-all duration-300">
+                    <div className={`text-5xl mb-6 transition-all duration-300 ${isShaking ? getShakeClass() : ''}`}>
                         {getMessage().emoji}
                     </div>
 
@@ -155,9 +174,9 @@ const BiteMeter = ({ onWin }) => {
                     </div>
 
                     <div className="flex items-center justify-center gap-2 text-green-500">
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                         <p className="font-bold">Du bist perfekt so! 💕</p>
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     </div>
                 </div>
             )}

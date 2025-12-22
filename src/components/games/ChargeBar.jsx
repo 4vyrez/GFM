@@ -16,8 +16,9 @@ const ChargeBar = ({ onWin }) => {
     const intervalRef = useRef(null);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         return () => {
+            clearTimeout(timer);
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
     }, []);
@@ -117,7 +118,7 @@ const ChargeBar = ({ onWin }) => {
                     />
 
                     {/* Target Zone Indicator (90-100%) */}
-                    <div className="absolute right-0 top-0 bottom-0 w-[10%] bg-green-500/30 border-l-2 border-dashed border-green-500" />
+                    <div className="absolute right-0 top-0 bottom-0 w-[10%] bg-green-500/30 border-l-2 border-dashed border-green-500" aria-hidden="true" />
 
                     {/* Percentage Display */}
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -170,9 +171,9 @@ const ChargeBar = ({ onWin }) => {
                 <div className="mt-6 animate-slide-up">
                     {won ? (
                         <div className="flex items-center justify-center gap-2 text-green-500">
-                            <SparkleIcon className="w-5 h-5" />
+                            <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                             <p className="text-lg font-bold">Perfektes Timing! 🎯</p>
-                            <SparkleIcon className="w-5 h-5" />
+                            <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                         </div>
                     ) : (
                         <button

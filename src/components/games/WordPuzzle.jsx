@@ -21,8 +21,9 @@ const WordPuzzle = ({ onWin }) => {
     const [hintCells, setHintCells] = useState([]);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         initializeGame();
+        return () => clearTimeout(timer);
     }, []);
 
     useEffect(() => {
@@ -219,6 +220,61 @@ const WordPuzzle = ({ onWin }) => {
         return `${seconds}.${tenths}s`;
     };
 
+    // Hint system - reveals first letter of an unfound word
+    const useHint = () => {
+        if (hintsUsed >= 3 || gameState !== 'playing') return;
+
+        // Find an unfound word
+        const unfoundWord = wordsToFind.find(word => !foundWords.includes(word));
+        if (!unfoundWord) return;
+
+        // Find the first cell of this word in the grid
+        for (let r = 0; r < gridSize; r++) {
+            for (let c = 0; c < gridSize; c++) {
+                if (grid[r][c] === unfoundWord[0]) {
+                    // Check if horizontal match
+                    if (c + unfoundWord.length <= gridSize) {
+                        let match = true;
+                        for (let i = 0; i < unfoundWord.length; i++) {
+                            if (grid[r][c + i] !== unfoundWord[i]) {
+                                match = false;
+                                break;
+                            }
+                        }
+                        if (match) {
+                            setHintCells([`${r}-${c}`]);
+                            setHintsUsed(prev => prev + 1);
+                            // Clear hint highlight after 3 seconds
+                            setTimeout(() => setHintCells([]), 3000);
+                            return;
+                        }
+                    }
+                    // Check if vertical match
+                    if (r + unfoundWord.length <= gridSize) {
+                        let match = true;
+                        for (let i = 0; i < unfoundWord.length; i++) {
+                            if (grid[r + i][c] !== unfoundWord[i]) {
+                                match = false;
+                                break;
+                            }
+                        }
+                        if (match) {
+                            setHintCells([`${r}-${c}`]);
+                            setHintsUsed(prev => prev + 1);
+                            // Clear hint highlight after 3 seconds
+                            setTimeout(() => setHintCells([]), 3000);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    const isHintCell = (row, col) => {
+        return hintCells.includes(`${row}-${col}`);
+    };
+
     return (
         <div
             className={`
@@ -294,6 +350,7 @@ const WordPuzzle = ({ onWin }) => {
                         row.map((letter, c) => {
                             const selected = isSelected(r, c);
                             const found = isFoundCell(r, c);
+                            const isHint = isHintCell(r, c);
 
                             return (
                                 <div
@@ -311,11 +368,13 @@ const WordPuzzle = ({ onWin }) => {
                                         cursor-pointer select-none
                                         transition-all duration-200 ease-bouncy
                                         animate-fade-in
-                                        ${selected
-                                            ? 'bg-gradient-to-br from-pastel-blue to-blue-400 text-white scale-110 shadow-lg z-10'
-                                            : found
-                                                ? 'bg-gradient-to-br from-green-200 to-green-300 text-green-700'
-                                                : 'bg-white/90 text-gray-700 hover:bg-white hover:scale-105'}
+                                        ${isHint
+                                            ? 'bg-gradient-to-br from-yellow-300 to-amber-400 text-amber-800 scale-110 shadow-lg z-10 animate-pulse'
+                                            : selected
+                                                ? 'bg-gradient-to-br from-pastel-blue to-blue-400 text-white scale-110 shadow-lg z-10'
+                                                : found
+                                                    ? 'bg-gradient-to-br from-green-200 to-green-300 text-green-700'
+                                                    : 'bg-white/90 text-gray-700 hover:bg-white hover:scale-105'}
                                         border border-white/50
                                     `}
                                 >
@@ -337,13 +396,31 @@ const WordPuzzle = ({ onWin }) => {
                 </button>
             )}
 
+            {/* Hint Button - visible during gameplay */}
+            {gameState === 'playing' && (
+                <button
+                    onClick={useHint}
+                    disabled={hintsUsed >= 3}
+                    className={`
+                        px-4 py-2 rounded-xl text-sm font-medium
+                        transition-all duration-300 ease-bouncy
+                        ${hintsUsed >= 3
+                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-900 hover:scale-105 shadow-md'
+                        }
+                    `}
+                >
+                    💡 Hinweis ({3 - hintsUsed} übrig)
+                </button>
+            )}
+
             {/* Win State */}
             {gameState === 'won' && (
                 <div className="text-center animate-slide-up">
                     <div className="flex items-center justify-center gap-2 text-green-500 mb-3">
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                         <span className="font-bold">Geschafft in {formatTime(elapsedTime)}!</span>
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     </div>
                     <button
                         onClick={initializeGame}

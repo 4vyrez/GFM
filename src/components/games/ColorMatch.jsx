@@ -6,10 +6,10 @@ import { SparkleIcon } from '../icons/Icons';
  */
 const ColorMatch = ({ onWin }) => {
     const colors = [
-        { name: 'Rosa', value: 'from-pastel-pink to-pink-300', emoji: '🌸', glow: 'shadow-glow-pink' },
-        { name: 'Blau', value: 'from-pastel-blue to-blue-300', emoji: '💙', glow: 'shadow-glow-blue' },
-        { name: 'Lavendel', value: 'from-pastel-lavender to-purple-300', emoji: '💜', glow: 'shadow-[0_0_20px_rgba(230,230,250,0.6)]' },
-        { name: 'Pfirsich', value: 'from-pastel-peach to-orange-200', emoji: '🍑', glow: 'shadow-[0_0_20px_rgba(255,218,185,0.6)]' },
+        { name: 'Rosa', value: 'from-pastel-pink to-pink-300', emoji: '🌸', glow: 'shadow-glow-pink', label: 'R' },
+        { name: 'Blau', value: 'from-pastel-blue to-blue-300', emoji: '💙', glow: 'shadow-glow-blue', label: 'B' },
+        { name: 'Lavendel', value: 'from-pastel-lavender to-purple-300', emoji: '💜', glow: 'shadow-[0_0_20px_rgba(230,230,250,0.6)]', label: 'L' },
+        { name: 'Pfirsich', value: 'from-pastel-peach to-orange-200', emoji: '🍑', glow: 'shadow-[0_0_20px_rgba(255,218,185,0.6)]', label: 'P' },
     ];
 
     const [sequence, setSequence] = useState([]);
@@ -23,7 +23,8 @@ const ColorMatch = ({ onWin }) => {
     const buttonRefs = useRef([]);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
+        return () => clearTimeout(timer);
     }, []);
 
     const startGame = () => {
@@ -128,7 +129,7 @@ const ColorMatch = ({ onWin }) => {
             <div className="text-center mb-6">
                 <div className="inline-flex items-center gap-2 badge mb-3">
                     <span>Versuch #{attempts}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                    <span className="w-1 h-1 rounded-full bg-gray-300" aria-hidden="true" />
                     <span>Level {level}/5</span>
                 </div>
 
@@ -184,6 +185,10 @@ const ColorMatch = ({ onWin }) => {
                             <span className={activeColor === index ? 'animate-bounce-in' : ''}>
                                 {color.emoji}
                             </span>
+                            {/* Colorblind-friendly label */}
+                            <span className="absolute bottom-1 right-1 text-xs font-bold text-white/60 bg-black/20 px-1.5 py-0.5 rounded">
+                                {color.label}
+                            </span>
                         </button>
                     ))}
                 </div>
@@ -221,9 +226,9 @@ const ColorMatch = ({ onWin }) => {
                 <div className="text-center animate-slide-up">
                     {gameState === 'won' && (
                         <div className="flex items-center justify-center gap-2 text-green-500 mb-3">
-                            <SparkleIcon className="w-5 h-5" />
+                            <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                             <span className="font-bold">Perfekt gemeistert!</span>
-                            <SparkleIcon className="w-5 h-5" />
+                            <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                         </div>
                     )}
                     <button

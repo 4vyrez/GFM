@@ -15,8 +15,9 @@ const FindTheHeart = ({ onWin }) => {
     const [nearHeart, setNearHeart] = useState(false);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         initializeGame();
+        return () => clearTimeout(timer);
     }, []);
 
     const initializeGame = () => {
@@ -36,6 +37,21 @@ const FindTheHeart = ({ onWin }) => {
         const heartCol = heartPosition % 4;
 
         return Math.abs(row - heartRow) <= 1 && Math.abs(col - heartCol) <= 1 && index !== heartPosition;
+    };
+
+    // Calculate warmth level (0-3) based on distance to heart
+    const getWarmthLevel = (index) => {
+        if (heartPosition === null) return 0;
+        const row = Math.floor(index / 4);
+        const col = index % 4;
+        const heartRow = Math.floor(heartPosition / 4);
+        const heartCol = heartPosition % 4;
+        const distance = Math.abs(row - heartRow) + Math.abs(col - heartCol);
+
+        if (distance <= 1) return 3; // Hot
+        if (distance <= 2) return 2; // Warm
+        if (distance <= 3) return 1; // Cool
+        return 0; // Cold
     };
 
     const handleCellClick = (index) => {
@@ -82,19 +98,20 @@ const FindTheHeart = ({ onWin }) => {
             `}
         >
             {/* Floating hearts background decoration */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {[...Array(5)].map((_, i) => (
+            <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+                {[...Array(8)].map((_, i) => (
                     <div
                         key={i}
                         className="absolute text-pastel-pink/20 animate-float"
                         style={{
-                            left: `${10 + i * 20}%`,
-                            top: `${Math.random() * 100}%`,
-                            animationDelay: `${i * 0.5}s`,
-                            fontSize: `${20 + Math.random() * 20}px`
+                            left: `${5 + i * 12}%`,
+                            top: `${10 + Math.sin(i) * 40}%`,
+                            animationDelay: `${i * 0.3}s`,
+                            fontSize: `${16 + Math.random() * 14}px`,
+                            animationDuration: `${5 + i * 0.5}s`
                         }}
                     >
-                        ❤️
+                        {i % 3 === 0 ? '💕' : i % 3 === 1 ? '✨' : '❤️'}
                     </div>
                 ))}
             </div>
@@ -103,7 +120,7 @@ const FindTheHeart = ({ onWin }) => {
             <div className="text-center mb-6 relative z-10">
                 <div className="inline-flex items-center gap-2 badge mb-3">
                     <span>Versuch #{attempts}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                    <span className="w-1 h-1 rounded-full bg-gray-300" aria-hidden="true" />
                     <span>{clicks} {clicks === 1 ? 'Klick' : 'Klicks'}</span>
                 </div>
 
@@ -132,13 +149,25 @@ const FindTheHeart = ({ onWin }) => {
                         const isRevealed = revealedCells.includes(index);
                         const isHeart = found && index === heartPosition;
                         const isNear = isRevealed && isNearby(index);
+                        const warmth = getWarmthLevel(index);
+
+                        // Warmth-based background colors for unrevealed cells
+                        const getWarmthHint = () => {
+                            if (isRevealed || found) return '';
+                            if (clicks < 3) return ''; // Don't show hints too early
+                            const opacity = warmth * 0.08;
+                            return `rgba(255, ${180 - warmth * 40}, ${180 - warmth * 50}, ${opacity})`;
+                        };
 
                         return (
                             <button
                                 key={index}
                                 onClick={() => handleCellClick(index)}
                                 disabled={found || isRevealed}
-                                style={{ animationDelay: `${index * 30}ms` }}
+                                style={{
+                                    animationDelay: `${index * 30}ms`,
+                                    backgroundColor: !isRevealed && !found && clicks >= 3 ? getWarmthHint() : undefined
+                                }}
                                 className={`
                                     aspect-square rounded-xl text-2xl
                                     flex items-center justify-center
@@ -173,11 +202,11 @@ const FindTheHeart = ({ onWin }) => {
             {found && (
                 <div className="text-center mb-6 animate-slide-up relative z-10">
                     <div className="flex items-center justify-center gap-2 text-pink-500 mb-2">
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                         <p className="text-lg font-bold">
                             Gefunden in {clicks} {clicks === 1 ? 'Versuch' : 'Versuchen'}! 🎯
                         </p>
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     </div>
                     <p className="text-sm text-gray-500">
                         {clicks <= 3 && 'Wow, super Glück! 🍀'}

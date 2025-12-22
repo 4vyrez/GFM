@@ -3,8 +3,8 @@ import { SparkleIcon } from '../icons/Icons';
 
 /**
  * LanguageChaos Game - Japanese Game Settings Meme
- * Navigate through confusing emoji-only menus to find language settings
- * No text hints at all - pure emoji puzzle navigation
+ * Navigate through confusing Japanese menus to find language settings
+ * Shows Japanese text to make it clear this is a meme about Japanese games
  */
 const LanguageChaos = ({ onWin }) => {
     const [currentMenu, setCurrentMenu] = useState('main');
@@ -18,127 +18,127 @@ const LanguageChaos = ({ onWin }) => {
         setTimeout(() => setIsVisible(true), 100);
     }, []);
 
-    // Menu structure - completely emoji based, no text at all
+    // Menu structure - Japanese text to make it clear this is a meme
     const menus = {
         main: {
             title: '⚙️',
-            subtitle: '🎮',
+            subtitle: '設定', // "Settings" in Japanese
             items: [
-                { icon: '🔊', action: 'audio' },
-                { icon: '🎮', action: 'controls' },
-                { icon: '📺', action: 'display' },
-                { icon: '💾', action: 'save' },
-                { icon: '🔧', action: 'advanced' },
-                { icon: '❓', action: 'help' },
+                { icon: '🔊', label: 'オーディオ', action: 'audio' },
+                { icon: '🎮', label: 'コントロール', action: 'controls' },
+                { icon: '📺', label: 'ディスプレイ', action: 'display' },
+                { icon: '💾', label: 'セーブデータ', action: 'save' },
+                { icon: '🔧', label: '詳細設定', action: 'advanced' },
+                { icon: '❓', label: 'ヘルプ', action: 'help' },
             ]
         },
         audio: {
             title: '🔊',
-            subtitle: '🎵',
+            subtitle: 'オーディオ',
             items: [
-                { icon: '🎵', action: 'dead' },
-                { icon: '🔈', action: 'dead' },
-                { icon: '🎧', action: 'dead' },
-                { icon: '🔔', action: 'dead' },
-                { icon: '⬅️', action: 'back' },
+                { icon: '🎵', label: 'BGM音量', action: 'dead' },
+                { icon: '🔈', label: 'SE音量', action: 'dead' },
+                { icon: '🎧', label: 'ボイス', action: 'dead' },
+                { icon: '🔔', label: '通知音', action: 'dead' },
+                { icon: '⬅️', label: '戻る', action: 'back' },
             ]
         },
         controls: {
             title: '🎮',
-            subtitle: '🕹️',
+            subtitle: 'コントロール',
             items: [
-                { icon: '🕹️', action: 'dead' },
-                { icon: '⌨️', action: 'dead' },
-                { icon: '🖱️', action: 'dead' },
-                { icon: '📱', action: 'dead' },
-                { icon: '⬅️', action: 'back' },
+                { icon: '🕹️', label: 'ゲームパッド', action: 'dead' },
+                { icon: '⌨️', label: 'キーボード', action: 'dead' },
+                { icon: '🖱️', label: 'マウス', action: 'dead' },
+                { icon: '📱', label: 'タッチ', action: 'dead' },
+                { icon: '⬅️', label: '戻る', action: 'back' },
             ]
         },
         display: {
             title: '📺',
-            subtitle: '🖥️',
+            subtitle: 'ディスプレイ',
             items: [
-                { icon: '🖥️', action: 'dead' },
-                { icon: '🌙', action: 'dead' },
-                { icon: '☀️', action: 'dead' },
-                { icon: '🔲', action: 'accessibility' },
-                { icon: '⬅️', action: 'back' },
+                { icon: '🖥️', label: '解像度', action: 'dead' },
+                { icon: '🌙', label: '明るさ', action: 'dead' },
+                { icon: '☀️', label: 'コントラスト', action: 'dead' },
+                { icon: '🔲', label: 'アクセシビリティ', action: 'accessibility' },
+                { icon: '⬅️', label: '戻る', action: 'back' },
             ]
         },
         accessibility: {
             title: '🔲',
-            subtitle: '👁️',
+            subtitle: 'アクセシビリティ',
             items: [
-                { icon: '👁️', action: 'dead' },
-                { icon: '🔤', action: 'dead' },
-                { icon: '🌐', action: 'language' }, // Hidden here!
-                { icon: '🎨', action: 'dead' },
-                { icon: '⬅️', action: 'back' },
+                { icon: '👁️', label: '視覚支援', action: 'dead' },
+                { icon: '🔤', label: '字幕', action: 'dead' },
+                { icon: '🌐', label: '言語', action: 'language' }, // Hidden here!
+                { icon: '🎨', label: '色調整', action: 'dead' },
+                { icon: '⬅️', label: '戻る', action: 'back' },
             ]
         },
         save: {
             title: '💾',
-            subtitle: '📁',
+            subtitle: 'セーブデータ',
             items: [
-                { icon: '📁', action: 'dead' },
-                { icon: '🗑️', action: 'dead' },
-                { icon: '☁️', action: 'dead' },
-                { icon: '⬅️', action: 'back' },
+                { icon: '📁', label: 'セーブスロット', action: 'dead' },
+                { icon: '🗑️', label: 'データ削除', action: 'dead' },
+                { icon: '☁️', label: 'クラウド同期', action: 'dead' },
+                { icon: '⬅️', label: '戻る', action: 'back' },
             ]
         },
         advanced: {
             title: '🔧',
-            subtitle: '⚡',
+            subtitle: '詳細設定',
             items: [
-                { icon: '⚡', action: 'dead' },
-                { icon: '🔋', action: 'dead' },
-                { icon: '📊', action: 'system' },
-                { icon: '🔒', action: 'dead' },
-                { icon: '⬅️', action: 'back' },
+                { icon: '⚡', label: 'パフォーマンス', action: 'dead' },
+                { icon: '🔋', label: '省エネモード', action: 'dead' },
+                { icon: '📊', label: 'システム', action: 'system' },
+                { icon: '🔒', label: 'セキュリティ', action: 'dead' },
+                { icon: '⬅️', label: '戻る', action: 'back' },
             ]
         },
         system: {
             title: '📊',
-            subtitle: '💻',
+            subtitle: 'システム',
             items: [
-                { icon: '💻', action: 'dead' },
-                { icon: '🔄', action: 'dead' },
-                { icon: '📋', action: 'dead' },
-                { icon: '🗂️', action: 'region' },
-                { icon: '⬅️', action: 'back' },
+                { icon: '💻', label: 'ハードウェア', action: 'dead' },
+                { icon: '🔄', label: 'アップデート', action: 'dead' },
+                { icon: '📋', label: 'ライセンス', action: 'dead' },
+                { icon: '🗂️', label: 'リージョン', action: 'region' },
+                { icon: '⬅️', label: '戻る', action: 'back' },
             ]
         },
         region: {
             title: '🗂️',
-            subtitle: '🗺️',
+            subtitle: 'リージョン',
             items: [
-                { icon: '🗺️', action: 'dead' },
-                { icon: '⏰', action: 'dead' },
-                { icon: '🌐', action: 'language' }, // Also hidden here!
-                { icon: '📅', action: 'dead' },
-                { icon: '⬅️', action: 'back' },
+                { icon: '🗺️', label: '地域', action: 'dead' },
+                { icon: '⏰', label: 'タイムゾーン', action: 'dead' },
+                { icon: '🌐', label: '言語', action: 'language' }, // Also hidden here!
+                { icon: '📅', label: '日付形式', action: 'dead' },
+                { icon: '⬅️', label: '戻る', action: 'back' },
             ]
         },
         help: {
             title: '❓',
-            subtitle: '📖',
+            subtitle: 'ヘルプ',
             items: [
-                { icon: '📖', action: 'dead' },
-                { icon: '💭', action: 'dead' },
-                { icon: '📧', action: 'dead' },
-                { icon: '⬅️', action: 'back' },
+                { icon: '📖', label: 'マニュアル', action: 'dead' },
+                { icon: '💭', label: 'FAQ', action: 'dead' },
+                { icon: '📧', label: 'お問い合わせ', action: 'dead' },
+                { icon: '⬅️', label: '戻る', action: 'back' },
             ]
         },
         language: {
             title: '🌐',
-            subtitle: '🗣️',
+            subtitle: '言語選択',
             items: [
-                { icon: '🇯🇵', action: 'dead' },
-                { icon: '🇩🇪', action: 'found' }, // GOAL!
-                { icon: '🇬🇧', action: 'dead' },
-                { icon: '🇫🇷', action: 'dead' },
-                { icon: '🇪🇸', action: 'dead' },
-                { icon: '⬅️', action: 'back' },
+                { icon: '🇯🇵', label: '日本語', action: 'dead' },
+                { icon: '🇩🇪', label: 'Deutsch', action: 'found' }, // GOAL!
+                { icon: '🇬🇧', label: 'English', action: 'dead' },
+                { icon: '🇫🇷', label: 'Français', action: 'dead' },
+                { icon: '🇪🇸', label: 'Español', action: 'dead' },
+                { icon: '⬅️', label: '戻る', action: 'back' },
             ]
         },
     };
@@ -252,16 +252,21 @@ const LanguageChaos = ({ onWin }) => {
                                 onClick={() => handleItemClick(item.action)}
                                 className={`
                                     aspect-square rounded-lg
-                                    flex items-center justify-center
-                                    text-3xl transition-all duration-200
+                                    flex flex-col items-center justify-center gap-1
+                                    text-2xl transition-all duration-200
                                     ${item.action === 'back'
-                                        ? 'bg-gray-700 hover:bg-gray-600 col-span-3 aspect-auto py-2'
+                                        ? 'bg-gray-700 hover:bg-gray-600 col-span-3 aspect-auto py-2 flex-row gap-2'
                                         : 'bg-gray-800 hover:bg-gray-700 border border-gray-700'
                                     }
                                     hover:scale-105 active:scale-95
                                 `}
                             >
-                                {item.icon}
+                                <span>{item.icon}</span>
+                                {item.label && (
+                                    <span className={`text-xs text-gray-300 ${item.action === 'back' ? '' : 'leading-tight'}`}>
+                                        {item.label}
+                                    </span>
+                                )}
                             </button>
                         ))}
                     </div>

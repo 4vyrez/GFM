@@ -10,7 +10,17 @@ const EmotionalArea = ({ photo, message }) => {
     const [imageLoaded, setImageLoaded] = useState(false);
     const [textRevealed, setTextRevealed] = useState(false);
     const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+    const [isClickLocked, setIsClickLocked] = useState(false);
     const messageRef = useRef(null);
+
+    // Handle photo click with debounce to prevent double-click issues
+    const handlePhotoClick = () => {
+        if (isClickLocked || isPhotoModalOpen) return;
+        setIsClickLocked(true);
+        setIsPhotoModalOpen(true);
+        // Reset lock after modal could be closed and reopened
+        setTimeout(() => setIsClickLocked(false), 300);
+    };
 
     useEffect(() => {
         // Staggered entrance animations
@@ -51,7 +61,7 @@ const EmotionalArea = ({ photo, message }) => {
                 {/* Image Banner with Ken Burns - Clickable */}
                 <div
                     className="relative h-72 sm:h-80 w-full overflow-hidden cursor-pointer"
-                    onClick={() => setIsPhotoModalOpen(true)}
+                    onClick={handlePhotoClick}
                 >
                     {/* Placeholder shimmer while loading */}
                     {!imageLoaded && (
@@ -60,8 +70,9 @@ const EmotionalArea = ({ photo, message }) => {
 
                     <img
                         src={`/photos/${photo.filename}`}
-                        alt={photo.alt}
+                        alt={photo.alt || 'Erinnerungsfoto'}
                         onLoad={() => setImageLoaded(true)}
+                        loading="lazy"
                         className={`
                             w-full h-full object-cover
                             transition-all duration-1000 ease-apple
@@ -71,10 +82,10 @@ const EmotionalArea = ({ photo, message }) => {
                     />
 
                     {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" aria-hidden="true" />
 
                     {/* Animated border ring */}
-                    <div className="absolute inset-0 border-4 border-white/20 rounded-t-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute inset-0 border-4 border-white/20 rounded-t-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden="true" />
 
                     {/* Click hint - appears on hover */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -100,10 +111,10 @@ const EmotionalArea = ({ photo, message }) => {
                     </div>
 
                     {/* Floating sparkles decoration */}
-                    <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-100">
+                    <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-100" aria-hidden="true">
                         <SparkleIcon className="w-5 h-5" />
                     </div>
-                    <div className="absolute top-8 right-8 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-200">
+                    <div className="absolute top-8 right-8 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-200" aria-hidden="true">
                         <SparkleIcon className="w-4 h-4" />
                     </div>
 
@@ -118,10 +129,12 @@ const EmotionalArea = ({ photo, message }) => {
                         mb-6 flex justify-center items-center gap-2
                         transition-all duration-700 delay-300
                         ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}
-                    `}>
-                        <SparkleIcon className="w-5 h-5 animate-float text-yellow-400" />
-                        <div className="text-3xl animate-heartbeat">💕</div>
-                        <SparkleIcon className="w-5 h-5 animate-float-slow text-pink-400" />
+                    `}
+                        aria-hidden="true"
+                    >
+                        <SparkleIcon className="w-5 h-5 animate-float text-yellow-400" aria-hidden="true" />
+                        <div className="text-3xl animate-heartbeat" aria-hidden="true">💕</div>
+                        <SparkleIcon className="w-5 h-5 animate-float-slow text-pink-400" aria-hidden="true" />
                     </div>
 
                     {/* Message with optimized reveal animation */}

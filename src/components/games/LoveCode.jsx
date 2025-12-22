@@ -23,8 +23,9 @@ const LoveCode = ({ onWin }) => {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        setTimeout(() => setIsVisible(true), 100);
+        const timer = setTimeout(() => setIsVisible(true), 100);
         initGame();
+        return () => clearTimeout(timer);
     }, []);
 
     const initGame = () => {
@@ -184,9 +185,9 @@ const LoveCode = ({ onWin }) => {
             {won && (
                 <div className="text-center animate-slide-up">
                     <div className="flex items-center justify-center gap-2 text-green-500 mb-2">
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                         <p className="text-lg font-bold">Perfekt! 💕</p>
-                        <SparkleIcon className="w-5 h-5" />
+                        <SparkleIcon className="w-5 h-5" aria-hidden="true" />
                     </div>
                     <p className="text-gray-500 text-sm italic">
                         "{currentSentence.correct}"
