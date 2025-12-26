@@ -58,6 +58,8 @@ import EasterEggs, { getRandomLoadingMessage } from './components/EasterEggs';
 import {
   getData,
   saveData,
+  fetchData,
+  syncData,
   getTodayDate,
   checkStreakLoss,
   isContentRefreshDue,
@@ -71,6 +73,7 @@ import {
   saveGameResult,
   getGameComparison
 } from './utils/storage';
+
 
 // Time-based greeting function
 const getGreeting = () => {
@@ -192,8 +195,9 @@ function App() {
     }
   }, []);
 
-  const initializeApp = () => {
-    let data = getData();
+  const initializeApp = async () => {
+    // Fetch data from server (falls back to cache if offline)
+    let data = await fetchData();
     data = checkStreakLoss(data);
 
     if (data.streak === 10 && !data.lastStreakUpdateDate) {
@@ -201,6 +205,7 @@ function App() {
     }
 
     saveData(data);
+
 
     const today = getTodayDate();
 

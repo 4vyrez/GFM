@@ -39,9 +39,9 @@ const defaultData = {
 };
 
 /**
- * Get data from localStorage
+ * Get cached data from localStorage (for fast initial load)
  */
-export const getData = () => {
+const getCachedData = () => {
     try {
         const data = localStorage.getItem(STORAGE_KEY);
         return data ? { ...defaultData, ...JSON.parse(data) } : defaultData;
@@ -52,15 +52,80 @@ export const getData = () => {
 };
 
 /**
- * Save data to localStorage
+ * Save data to localStorage cache
  */
-export const saveData = (data) => {
+const saveCachedData = (data) => {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
         console.error('Error writing to localStorage:', error);
     }
 };
+
+/**
+ * Fetch data from server API (async)
+ * Falls back to localStorage cache if API fails
+ */
+export const fetchData = async () => {
+    const cached = getCachedData();
+    try {
+        const res = await fetch('/api/state', {
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        if (!res.ok) {
+            console.warn('API fetch failed, using cached data');
+            return cached;
+        }
+        const serverData = await res.json();
+        // Merge server data with defaults and cache locally
+        const mergedData = { ...defaultData, ...serverData };
+        saveCachedData(mergedData);
+        return mergedData;
+    } catch (error) {
+        console.error('Error fetching from API:', error);
+        return cached; // Offline fallback
+    }
+};
+
+/**
+ * Sync data to server API (async)
+ * Also saves to localStorage for immediate local access
+ */
+export const syncData = async (data) => {
+    // Always save locally first for immediate access
+    saveCachedData(data);
+    try {
+        await fetch('/api/state', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+    } catch (error) {
+        console.error('Sync failed, data cached locally:', error);
+    }
+};
+
+/**
+ * Get data synchronously from cache (legacy compatibility)
+ * @deprecated Use fetchData() for async cloud-synced data
+ */
+export const getData = () => {
+    return getCachedData();
+};
+
+/**
+ * Save data synchronously to cache and async to server
+ * This maintains backwards compatibility while adding cloud sync
+ */
+export const saveData = (data) => {
+    saveCachedData(data);
+    // Fire-and-forget sync to server
+    syncData(data).catch(err => console.error('Background sync failed:', err));
+};
+
+
 
 /**
  * Get today's date in YYYY-MM-DD format
