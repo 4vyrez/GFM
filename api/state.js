@@ -9,9 +9,10 @@ import { parse } from 'cookie';
  * Headers: Cookie with gfm_auth
  */
 export default async function handler(req, res) {
-    // Enable CORS
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Enable CORS - use specific origin for credentials support
+    const origin = req.headers.origin || 'https://gfm-indol.vercel.app';
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie');
 

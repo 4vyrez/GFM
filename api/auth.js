@@ -8,11 +8,13 @@ import prisma from './_lib/prisma.js';
  * Response: { success: boolean, message?: string }
  */
 export default async function handler(req, res) {
-    // Enable CORS
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Enable CORS - use specific origin for credentials support
+    const origin = req.headers.origin || 'https://gfm-indol.vercel.app';
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
 
     if (req.method === 'OPTIONS') {
         res.status(200).end();
@@ -48,9 +50,9 @@ export default async function handler(req, res) {
             data: { lastAccess: new Date() }
         });
 
-        // Set auth cookie (httpOnly for security)
+        // Set auth cookie (httpOnly for security, Secure for HTTPS)
         res.setHeader('Set-Cookie', [
-            `gfm_auth=${code.toLowerCase().trim()}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${60 * 60 * 24 * 365}` // 1 year
+            `gfm_auth=${code.toLowerCase().trim()}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${60 * 60 * 24 * 365}` // 1 year
         ]);
 
         return res.status(200).json({
