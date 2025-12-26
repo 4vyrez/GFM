@@ -51,6 +51,9 @@ model UserState {
   // Mood tracking
   moodReactions         Json     @default("{}")
   
+  // State Versioning for Sync Logic
+  dataRevision          Int      @default(0)
+  
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }

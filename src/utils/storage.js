@@ -36,6 +36,7 @@ const defaultData = {
         minigameId: null,
         isSpecial: false,
     },
+    dataRevision: 0, // Version ID for sync authority
 };
 
 /**
@@ -81,19 +82,30 @@ export const fetchData = async () => {
 
         const serverData = await res.json();
 
-        // Smart Sync Logic:
-        // If local data has a higher streak than server (e.g. played offline or after DB reset),
-        // we assume local is the authority and sync it Up to the server.
-        // If server is ahead or equal, we trust the server.
+        // Smart Sync Logic with Version Authority:
+        // 1. Check Data Revision (Epoch): If Server > Local, it means a Forced Reset/Upgrade happened.
+        //    Server Wins absolutely.
+        // 2. If Revisions are equal (or local is higher? shouldn't happen), check Streak.
+        //    If Local Streak > Server Streak, Client Wins (Recovery).
+
+        const localRev = cached.dataRevision || 0;
+        const serverRev = serverData.dataRevision || 0;
+
+        if (serverRev > localRev) {
+            console.log(`Smart Sync: Server Revision (${serverRev}) > Local (${localRev}). Forced Server Update.`);
+            // Server authority wins - likely a reset
+            const mergedData = { ...defaultData, ...serverData };
+            saveCachedData(mergedData);
+            return mergedData;
+        }
 
         const localStreak = cached.streak || 0;
         const serverStreak = serverData.streak || 0;
 
         if (localStreak > serverStreak) {
             console.log(`Smart Sync: Local streak (${localStreak}) > Server (${serverStreak}). Syncing up.`);
-            // Merge: keep local critical stats, but maybe adopt some server flags if needed?
-            // For now, simple "Client Wins" on conflict is safer for data recovery.
-            const mergedData = { ...defaultData, ...cached };
+            // Merge: keep local critical stats
+            const mergedData = { ...defaultData, ...cached, dataRevision: serverRev }; // Adopt server revision
 
             // Push the winner back to server immediately
             syncData(mergedData).catch(err => console.error('Smart sync push failed:', err));
