@@ -1,4 +1,4 @@
-import prisma from '../../lib/prisma.js';
+import prisma from './_lib/prisma.js';
 
 /**
  * Simple Code-based Authentication for GFM App

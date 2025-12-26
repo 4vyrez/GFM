@@ -1,4 +1,4 @@
-import prisma from '../../lib/prisma.js';
+import prisma from './_lib/prisma.js';
 import { parse } from 'cookie';
 
 /**
