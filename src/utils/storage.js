@@ -73,15 +73,39 @@ export const fetchData = async () => {
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
         });
+
         if (!res.ok) {
             console.warn('API fetch failed, using cached data');
             return cached;
         }
+
         const serverData = await res.json();
-        // Merge server data with defaults and cache locally
-        const mergedData = { ...defaultData, ...serverData };
-        saveCachedData(mergedData);
-        return mergedData;
+
+        // Smart Sync Logic:
+        // If local data has a higher streak than server (e.g. played offline or after DB reset),
+        // we assume local is the authority and sync it Up to the server.
+        // If server is ahead or equal, we trust the server.
+
+        const localStreak = cached.streak || 0;
+        const serverStreak = serverData.streak || 0;
+
+        if (localStreak > serverStreak) {
+            console.log(`Smart Sync: Local streak (${localStreak}) > Server (${serverStreak}). Syncing up.`);
+            // Merge: keep local critical stats, but maybe adopt some server flags if needed?
+            // For now, simple "Client Wins" on conflict is safer for data recovery.
+            const mergedData = { ...defaultData, ...cached };
+
+            // Push the winner back to server immediately
+            syncData(mergedData).catch(err => console.error('Smart sync push failed:', err));
+
+            return mergedData;
+        } else {
+            console.log(`Smart Sync: Server streak (${serverStreak}) >= Local (${localStreak}). Using server.`);
+            // Merge server data with defaults and cache locally
+            const mergedData = { ...defaultData, ...serverData };
+            saveCachedData(mergedData);
+            return mergedData;
+        }
     } catch (error) {
         console.error('Error fetching from API:', error);
         return cached; // Offline fallback
